@@ -27,6 +27,7 @@ header, footer {
 
 #map {
   flex: 1;
+  height: 100%;
 }
 
 #stats p {
