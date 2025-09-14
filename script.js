@@ -11,11 +11,10 @@ const flightCountEl = document.getElementById("flightCount");
 const totalCO2El = document.getElementById("totalCO2");
 const avgCO2El = document.getElementById("avgCO2");
 
-// Simple CO2 estimation function (kg per flight)
-// Note: this is a hackathon-level approximation, not scientific
+// Simple CO2 estimation function (hackathon-level)
 function estimateCO2(altitudeMeters) {
-  if (!altitudeMeters || altitudeMeters <= 0) return 50; // assume ~50kg minimum
-  return Math.min(altitudeMeters / 10, 500); // cap at 500kg for demo
+  if (!altitudeMeters || altitudeMeters <= 0) return 50; 
+  return Math.min(altitudeMeters / 10, 500); 
 }
 
 // Fetch flight data from OpenSky API
