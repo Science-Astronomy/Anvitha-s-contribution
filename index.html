@@ -1,76 +1,44 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Air Traffic Emissions Dashboard — Starter</title>
-
-  <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-
-  <!-- Our CSS -->
+  <meta charset="UTF-8">
+  <title>Air Traffic Emissions Dashboard</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 </head>
 <body>
-  <div class="app">
-    <div class="left">
-      <div class="header">
-        <div>
-          <h1>Air Traffic Emissions Dashboard</h1>
-          <p class="muted">Interactive map of sample flights with CO₂ estimates</p>
-        </div>
-        <div class="buttons">
-          <button class="btn" id="refreshBtn">Refresh</button>
-          <button class="small" id="demoToggle">Demo data</button>
-        </div>
+  <!-- Header -->
+  <header>
+    <h1>Air Traffic Emissions Dashboard</h1>
+  </header>
+
+  <!-- Main layout -->
+  <div class="container">
+    <!-- Sidebar Dashboard -->
+    <aside id="dashboard">
+      <h2>Flight Stats</h2>
+      <div id="stats">
+        <p>Total Flights: <span id="flightCount">0</span></p>
+        <p>Total Estimated CO₂: <span id="totalCO2">0</span> tons</p>
+        <p>Average CO₂ per Flight: <span id="avgCO2">0</span> kg</p>
       </div>
 
-      <div class="map card" id="map"></div>
-      <div class="muted">Click a flight marker to view estimated emissions.</div>
-    </div>
+      <h3>Top Routes</h3>
+      <canvas id="routesChart" width="200" height="200"></canvas>
+    </aside>
 
-    <div class="right">
-      <div class="summary-header">
-        <h1>Summary</h1>
-        <p class="muted">Totals and leaderboard from the loaded flights</p>
-        <div class="muted">Updated: <span id="updatedAt">—</span></div>
-      </div>
-
-      <div class="stat-grid">
-        <div class="stat card">
-          <div class="muted">Total Emissions (kg CO₂)</div>
-          <div class="value" id="totalEmissions">0</div>
-        </div>
-        <div class="stat card">
-          <div class="muted">Avg per Flight (kg)</div>
-          <div class="value" id="avgEmission">0</div>
-        </div>
-        <div class="stat card">
-          <div class="muted">Flights Loaded</div>
-          <div class="value" id="flightCount">0</div>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>Top routes by emissions</h2>
-        <div id="topRoutes" class="list"></div>
-      </div>
-
-      <div class="card">
-        <h2>Emissions by route</h2>
-        <canvas id="emChart" height="140"></canvas>
-      </div>
-    </div>
+    <!-- Map Area -->
+    <main id="map"></main>
   </div>
 
-  <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Footer -->
+  <footer>
+    <p>Data from <a href="https://opensky-network.org" target="_blank">OpenSky Network</a></p>
+  </footer>
 
-  <!-- Our JS -->
+  <!-- Scripts -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
-
