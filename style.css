@@ -76,15 +76,6 @@ body {
   cursor: pointer;
 }
 
-.small {
-  font-size: 13px;
-  padding: 8px 10px;
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.02);
-  color: var(--muted);
-}
-
 .stat-grid {
   display: flex;
   gap: 8px;
@@ -123,20 +114,4 @@ body {
 
 .right {
   overflow: auto;
-}
-
-/* small chips for fields */
-.chips {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-  margin-top: 4px;
-}
-.chip {
-  font-size: 11px;
-  padding: 2px 6px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: #cfe7ff;
 }
