@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Air Traffic Emissions Dashboard — OpenSky Live</title>
+
+    <!-- Leaflet CSS -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <!-- Our CSS -->
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="app">
+      <div class="left">
+        <div class="header">
+          <div>
+            <h1>Air Traffic Emissions Dashboard</h1>
+            <p class="muted">Live positions from OpenSky</p>
+          </div>
+          <div class="buttons">
+            <button class="btn" id="refreshBtn">Refresh</button>
+          </div>
+        </div>
+
+        <div class="map card" id="map"></div>
+        <div class="muted">Click a flight marker/arrow to see details.</div>
+      </div>
+
+      <div class="right">
+        <div class="summary-header">
+          <h1>Summary</h1>
+          <p class="muted">OpenSky live snapshot</p>
+          <div class="muted">Updated: <span id="updatedAt">—</span></div>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat card">
+            <div class="muted">Flights Loaded</div>
+            <div class="value" id="flightCount">0</div>
+          </div>
+          <div class="stat card">
+            <div class="muted">Avg Velocity (km/h)</div>
+            <div class="value" id="avgVelocity">0</div>
+          </div>
+          <div class="stat card">
+            <div class="muted">Avg CO₂ Rate (kg/h)</div>
+            <div class="value" id="avgRate">0</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Top flights by CO₂ rate (est.)</h2>
+          <div id="topFlights" class="list"></div>
+        </div>
+
+        <div class="card">
+          <h2>CO₂ rate by flight</h2>
+          <canvas id="emChart" height="140"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- Our JS -->
+    <script src="script.js"></script>
+  </body>
+</html>
