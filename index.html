@@ -219,6 +219,19 @@
         font-weight: 700;
         color: #14532d;
       }
+      .hint {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: -6px;
+      }
+      input[readonly] {
+        background: #f8fafc;
+      }
+      .warn {
+        color: #b91c1c;
+        font-size: 12px;
+        margin-top: -6px;
+      }
     </style>
   </head>
   <body>
@@ -278,8 +291,9 @@
         <section class="content-grid">
           <div class="card">
             <form id="addFlightForm" class="form-grid">
-              <label>From <input type="text" name="from" required /></label>
-              <label>To <input type="text" name="to" required /></label>
+              <label>From <input type="text" name="from" placeholder="SFO or @37.62,-122.38" required /></label>
+              <label>To <input type="text" name="to" placeholder="LAX or @33.94,-118.41" required /></label>
+              <div class="hint">Tip: Use IATA (e.g., <b>SFO</b>, <b>LAX</b>, <b>JFK</b>) or ICAO (e.g., <b>KSFO</b>), or a literal like <span style="font-family:ui-monospace">@lat,lon</span>.</div>
               <label>Date <input type="date" name="date" required /></label>
               <label>Airline <input type="text" name="airline" /></label>
               <label>Code <input type="text" name="code" /></label>
@@ -298,9 +312,11 @@
                   <option value="first">First</option>
                 </select>
               </label>
-              <label
-                >Distance (km) <input type="number" name="km" required
-              /></label>
+
+              <!-- Distance now auto-calculated (readonly) -->
+              <label>Distance (km) <input type="number" name="km" readonly placeholder="— auto —" /></label>
+              <div id="placeWarn" class="warn" style="display:none">Enter valid places (IATA/ICAO or @lat,lon) for both From and To.</div>
+
               <button type="submit" class="btn-green">Add Flight</button>
             </form>
           </div>
@@ -333,7 +349,77 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script>
-      // Prefilled demo flights so the list isn't empty
+      // ---------------------------
+      // (FYI) Live state data source if you add maps/lists later:
+      // OpenSky Network 'states' feed: https://opensky-network.org/api/states/all
+      // It does NOT include route distance; we compute distance locally below.
+      // ---------------------------
+
+      // Minimal airport DB (expand anytime; add more codes as needed)
+      // IATA: [lat, lon, ICAO]
+      const AIRPORTS = {
+        "SFO": [37.6213, -122.3790, "KSFO"],
+        "LAX": [33.9416, -118.4085, "KLAX"],
+        "JFK": [40.6413,  -73.7781, "KJFK"],
+        "EWR": [40.6895,  -74.1745, "KEWR"],
+        "ORD": [41.9742,  -87.9073, "KORD"],
+        "SEA": [47.4502, -122.3088, "KSEA"],
+        "DFW": [32.8998,  -97.0403, "KDFW"],
+        "DEN": [39.8561, -104.6737, "KDEN"],
+        "ATL": [33.6407,  -84.4277, "KATL"],
+        "BOS": [42.3656,  -71.0096, "KBOS"],
+        "SJC": [37.3639, -121.9289, "KSJC"],
+        "DEL": [28.5562,   77.1000, "VIDP"],
+        "LHR": [51.4700,   -0.4543, "EGLL"],
+        "CDG": [49.0097,    2.5479, "LFPG"],
+        "DXB": [25.2532,   55.3657, "OMDB"],
+        "SIN": [ 1.3644,  103.9915, "WSSS"],
+        "SYD": [-33.9399, 151.1753, "YSSY"],
+        "HND": [35.5494,  139.7798, "RJTT"],
+        "NRT": [35.7719,  140.3929, "RJAA"],
+        "YYZ": [43.6777,  -79.6248, "CYYZ"]
+      };
+
+      function lookupAirport(place) {
+        if (!place) return null;
+        const p = place.trim().toUpperCase();
+
+        // @lat,lon literal
+        if (p.startsWith("@")) {
+          const parts = p.slice(1).split(",");
+          if (parts.length === 2) {
+            const lat = parseFloat(parts[0]);
+            const lon = parseFloat(parts[1]);
+            if (Number.isFinite(lat) && Number.isFinite(lon)) return [lat, lon];
+          }
+          return null;
+        }
+
+        // IATA direct
+        if (AIRPORTS[p]) return [AIRPORTS[p][0], AIRPORTS[p][1]];
+
+        // ICAO match by scanning values
+        for (const iata in AIRPORTS) {
+          const icao = AIRPORTS[iata][2];
+          if (icao && icao.toUpperCase() === p) return [AIRPORTS[iata][0], AIRPORTS[iata][1]];
+        }
+        return null;
+      }
+
+      // Haversine great-circle distance
+      const R_KM = 6371;
+      const toRad = (deg) => deg * Math.PI / 180;
+      function haversineKm(a, b) {
+        const [lat1, lon1] = a, [lat2, lon2] = b;
+        const dLat = toRad(lat2 - lat1);
+        const dLon = toRad(lon2 - lon1);
+        const h = Math.sin(dLat/2)**2 +
+                  Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+                  Math.sin(dLon/2)**2;
+        return 2 * R_KM * Math.asin(Math.sqrt(h));
+      }
+
+      // Prefilled demo flights
       const recent = [
         {
           airline: "British Airways",
@@ -399,12 +485,8 @@
           ul.innerHTML += `<li class="flight">
               <div>✈️</div>
               <div>
-                <div><strong>${r.airline}</strong> <span class="badge">${
-            r.code
-          }</span> <span class="tag">${r.cabin}</span></div>
-                <div class="dim">${
-                  r.from
-                } <span style="margin:0 6px">→</span> ${r.to} • ${r.when}</div>
+                <div><strong>${r.airline}</strong> <span class="badge">${r.code}</span> <span class="tag">${r.cabin}</span></div>
+                <div class="dim">${r.from} <span style="margin:0 6px">→</span> ${r.to} • ${r.when}</div>
                 <div class="dim">${r.km.toLocaleString()} km • ${r.type}</div>
               </div>
               <div><div class="badge">${r.co2kg.toLocaleString()} kg CO₂</div></div>
@@ -441,40 +523,58 @@
         dash.classList.remove("hidden");
       };
 
-      // Form + estimates
+      // -------- Auto distance + estimates on the Add Flight form --------
       const form = document.getElementById("addFlightForm");
+      const warn = document.getElementById("placeWarn");
+
+      function computeKmFromPlaces() {
+        const a = lookupAirport(form.from.value);
+        const b = lookupAirport(form.to.value);
+        if (!a || !b) {
+          warn.style.display = (form.from.value || form.to.value) ? "block" : "none";
+          form.km.value = "";
+          return 0;
+        }
+        warn.style.display = "none";
+        const km = Math.round(haversineKm(a, b));
+        form.km.value = km; // populate readonly field
+        return km;
+      }
+
       function estimate() {
-        const km = +form.km.value || 0;
+        // ensure km reflects current places before estimating
+        const km = computeKmFromPlaces();
         const cabin = form.cabin.value;
         const ac = form.aircraft.value;
-        let f = 0.18; // demo base
+
+        let f = 0.18; // demo emission factor kg/km
         if (ac === "wide") f *= 1.05;
         if (cabin === "business") f *= 2;
         if (cabin === "first") f *= 3;
+
         const co2 = Math.round(km * f);
         const trees = Math.round(co2 / 22);
-        document.getElementById(
-          "estimateCO2"
-        ).textContent = `${co2.toLocaleString()} kg`;
-        document.getElementById(
-          "estimateMeta"
-        ).textContent = `Distance: ${km.toLocaleString()} km • Trees: ${trees.toLocaleString()}`;
-        document.getElementById("perspCar").textContent = Math.round(
-          co2 / 0.12
-        ).toLocaleString();
-        document.getElementById("perspTrees").textContent =
-          trees.toLocaleString();
-        document.getElementById("perspEnergy").textContent = Math.round(
-          co2 / 300
-        ).toLocaleString();
-        return co2;
+
+        document.getElementById("estimateCO2").textContent = `${co2.toLocaleString()} kg`;
+        document.getElementById("estimateMeta").textContent = `Distance: ${km.toLocaleString()} km • Trees: ${trees.toLocaleString()}`;
+        document.getElementById("perspCar").textContent = Math.round(co2 / 0.12).toLocaleString();
+        document.getElementById("perspTrees").textContent = trees.toLocaleString();
+        document.getElementById("perspEnergy").textContent = Math.round(co2 / 300).toLocaleString();
+        return { km, co2 };
       }
-      form.oninput = estimate;
+
+      // Recalculate on any relevant change
+      ["input","change","blur"].forEach(ev => {
+        form.from.addEventListener(ev, estimate);
+        form.to.addEventListener(ev, estimate);
+        form.cabin.addEventListener(ev, estimate);
+        form.aircraft.addEventListener(ev, estimate);
+      });
 
       form.onsubmit = (e) => {
         e.preventDefault();
-        const co2 = estimate();
-        const km = +form.km.value || 0;
+        const { km, co2 } = estimate();
+        if (!km) { warn.style.display = "block"; return; }
 
         recent.unshift({
           airline: form.airline.value || "Airline",
@@ -495,7 +595,12 @@
         add.classList.add("hidden");
         dash.classList.remove("hidden");
         form.reset();
-        estimate();
+        document.getElementById("estimateCO2").textContent = "0 kg";
+        document.getElementById("estimateMeta").textContent = "Distance: 0 km • Trees: 0";
+        document.getElementById("perspCar").textContent = "0";
+        document.getElementById("perspTrees").textContent = "0";
+        document.getElementById("perspEnergy").textContent = "0";
+        warn.style.display = "none";
       };
 
       // Initial paint with demo flights
