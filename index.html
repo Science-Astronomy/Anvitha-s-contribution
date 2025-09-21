@@ -5,122 +5,61 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>FlightTracker • Carbon Impact Monitor</title>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
     <style>
       :root {
-        --bg: #f1f8f4;
-        --panel: #ffffff;
-        --ink: #0f172a;
-        --muted: #64748b;
-        --line: #e2e8f0;
-        --blue: #2563eb;
-        --red: #ef4444;
-        --purple: #7c3aed;
-        --green: #16a34a;
-        --shadow: 0 10px 20px rgba(2, 6, 23, 0.06),
-          0 2px 6px rgba(2, 6, 23, 0.04);
+        --bg:#f1f8f4; --panel:#ffffff; --ink:#0f172a; --muted:#64748b; --line:#e2e8f0;
+        --blue:#2563eb; --red:#ef4444; --purple:#7c3aed; --green:#16a34a;
+        --shadow:0 10px 20px rgba(2,6,23,.06), 0 2px 6px rgba(2,6,23,.04);
       }
-      body {
-        margin: 0;
-        font-family: Inter, system-ui, sans-serif;
-        color: var(--ink);
-        background: var(--bg);
-        display: flex;
-        height: 100%;
-      }
-      .sidebar {
-        width: 250px;
-        min-height: 100vh;
-        background: #fff;
-        border-right: 1px solid var(--line);
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        padding: 18px 14px;
-      }
-      .main {
-        flex: 1;
-        padding: 24px;
-        overflow: auto;
-      }
-      .brand {
-        display: flex;
-        gap: 12px;
-        align-items: center;
-      }
-      .brand-icon {
-        width: 40px;
-        height: 40px;
-        display: grid;
-        place-items: center;
-        background: #e6f6ea;
-        border-radius: 12px;
-      }
-      .brand-title { font-weight: 700; }
-      .brand-sub { font-size: 0.85rem; color: var(--muted); }
-      .nav { display: flex; flex-direction: column; gap: 8px; margin-top: 18px; }
-      .nav-item, .btn { cursor: pointer; border: none; border-radius: 12px; padding: 10px 12px; font-weight: 600; }
-      .nav-item { display: flex; gap: 10px; text-decoration: none; color: var(--ink); }
-      .nav-item.active { background: #e8fff0; color: #166534; }
-      .btn-ghost { background: #eef2ff; color: #4338ca; }
-      .sidebar-cta { margin-top: auto; display: grid; gap: 8px; place-items: center; padding: 14px; border: 1px dashed #94a3b8; border-radius: 14px; background: #ecfdf5; }
+      body{margin:0;font-family:Inter,system-ui,sans-serif;color:var(--ink);background:var(--bg);display:flex;height:100%}
+      .sidebar{width:250px;min-height:100vh;background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column;justify-content:space-between;padding:18px 14px}
+      .main{flex:1;padding:24px;overflow:auto}
+      .brand{display:flex;gap:12px;align-items:center}
+      .brand-icon{width:40px;height:40px;display:grid;place-items:center;background:#e6f6ea;border-radius:12px}
+      .brand-title{font-weight:700}.brand-sub{font-size:.85rem;color:var(--muted)}
+      .nav{display:flex;flex-direction:column;gap:8px;margin-top:18px}
+      .nav-item,.btn{cursor:pointer;border:none;border-radius:12px;padding:10px 12px;font-weight:600}
+      .nav-item{display:flex;gap:10px;text-decoration:none;color:var(--ink)}
+      .nav-item.active{background:#e8fff0;color:#166534}
+      .btn-ghost{background:#eef2ff;color:#4338ca}
+      .sidebar-cta{margin-top:auto;display:grid;gap:8px;place-items:center;padding:14px;border:1px dashed #94a3b8;border-radius:14px;background:#ecfdf5}
+      .page-header h1{margin:0 0 4px;font-size:2rem;color:#166534}
 
-      .page-header h1 { margin: 0 0 4px; font-size: 2rem; color: #166534; }
+      .kpi-grid{margin-top:18px;display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+      .kpi{background:var(--panel);border-radius:18px;padding:14px;box-shadow:var(--shadow)}
+      .kpi-value{font-size:28px;font-weight:700;color:#fff}
+      .kpi-blue{background:linear-gradient(135deg,#1d4ed8,#60a5fa)}
+      .kpi-red{background:linear-gradient(135deg,#dc2626,#fb7185)}
+      .kpi-purple{background:linear-gradient(135deg,#7c3aed,#a78bfa)}
+      .kpi-green{background:linear-gradient(135deg,#16a34a,#34d399)}
 
-      .kpi-grid { margin-top: 18px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-      .kpi { background: var(--panel); border-radius: 18px; padding: 14px; box-shadow: var(--shadow); }
-      .kpi-value { font-size: 28px; font-weight: 700; color: #fff; }
-      .kpi-blue { background: linear-gradient(135deg, #1d4ed8, #60a5fa); }
-      .kpi-red { background: linear-gradient(135deg, #dc2626, #fb7185); }
-      .kpi-purple { background: linear-gradient(135deg, #7c3aed, #a78bfa); }
-      .kpi-green { background: linear-gradient(135deg, #16a34a, #34d399); }
+      .content-grid{margin-top:18px;display:grid;grid-template-columns:2fr 1fr;gap:18px}
+      .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:16px}
 
-      .content-grid { margin-top: 18px; display: grid; grid-template-columns: 2fr 1fr; gap: 18px; }
-      .card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow); padding: 16px; }
+      .flight-list{list-style:none;padding:0;margin:0;display:grid;gap:12px}
+      .flight{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:14px;background:#f8fafc}
+      .badge{font-size:.75rem;padding:2px 8px;border-radius:999px;background:#e2e8f0}
+      .tag{font-size:.7rem;padding:2px 8px;border-radius:999px;background:#ecfeff;color:#0891b2;margin-left:6px}
+      .dim{color:var(--muted)}
+      .hidden{display:none}
+      .form-grid{display:grid;gap:12px}
+      .form-grid input,.form-grid select{padding:8px;border:1px solid var(--line);border-radius:8px}
+      .btn-green{background:linear-gradient(135deg,#16a34a,#34d399);color:#fff}
+      .persp-box{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;background:#f0fdf4;padding:12px;border-radius:12px}
+      .persp-box div:last-child{font-weight:700;color:#14532d}
+      .hint{font-size:12px;color:var(--muted);margin-top:-6px}
+      input[readonly]{background:#f8fafc}
+      .warn{color:#b91c1c;font-size:12px;margin-top:-6px}
 
-      .flight-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
-      .flight { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; padding: 12px; border: 1px solid var(--line); border-radius: 14px; background: #f8fafc; }
-      .badge { font-size: 0.75rem; padding: 2px 8px; border-radius: 999px; background: #e2e8f0; }
-      .tag { font-size: 0.7rem; padding: 2px 8px; border-radius: 999px; background: #ecfeff; color: #0891b2; margin-left: 6px; }
-      .dim { color: var(--muted); }
-      .hidden { display: none; }
-
-      .form-grid { display: grid; gap: 12px; }
-      .form-grid input, .form-grid select { padding: 8px; border: 1px solid var(--line); border-radius: 8px; }
-      .btn-green { background: linear-gradient(135deg, #16a34a, #34d399); color: #fff; }
-
-      .persp-box { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; background: #f0fdf4; padding: 12px; border-radius: 12px; }
-      .persp-box div:last-child { font-weight: 700; color: #14532d; }
-
-      .hint { font-size: 12px; color: var(--muted); margin-top: -6px; }
-      input[readonly] { background: #f8fafc; }
-      .warn { color: #b91c1c; font-size: 12px; margin-top: -6px; }
-
-      /* --- Environmental Impact card styles --- */
-      .impact-card {
-        background: linear-gradient(135deg, #16a34a, #60d394);
-        color: #052e16;
-        border: none;
-      }
-      .impact-title { display: flex; align-items: center; gap: 8px; font-weight: 700; color: #052e16; }
-      .impact-grid {
-        margin-top: 8px;
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 12px;
-      }
-      .impact-item {
-        background: rgba(255,255,255,.25);
-        border-radius: 12px;
-        padding: 12px;
-      }
-      .impact-value { font-size: 28px; font-weight: 800; }
-      .impact-label { font-size: 12px; opacity: .9; }
-      /* make the impact card span full width under the two-column grid */
-      .impact-card.grid-span { grid-column: 1 / -1; }
+      /* Environmental Impact card */
+      .impact-card{background:linear-gradient(135deg,#16a34a,#60d394);color:#052e16;border:none}
+      .impact-title{display:flex;align-items:center;gap:8px;font-weight:700;color:#052e16}
+      .impact-grid{margin-top:8px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+      .impact-item{background:rgba(255,255,255,.25);border-radius:12px;padding:12px}
+      .impact-value{font-size:28px;font-weight:800}
+      .impact-label{font-size:12px;opacity:.9}
+      .impact-card.grid-span{grid-column:1 / -1}
     </style>
   </head>
   <body>
@@ -148,29 +87,14 @@
       <section id="dashboardSection">
         <header class="page-header"><h1>Flight Dashboard</h1></header>
         <section class="kpi-grid">
-          <div class="kpi kpi-blue">
-            <div class="kpi-value" id="kpiFlights">0</div>
-            <div>Total Flights</div>
-          </div>
-          <div class="kpi kpi-red">
-            <div class="kpi-value" id="kpiCO2">0 kg</div>
-            <div>Total CO₂</div>
-          </div>
-          <div class="kpi kpi-purple">
-            <div class="kpi-value" id="kpiKm">0 km</div>
-            <div>Distance</div>
-          </div>
-          <div class="kpi kpi-green">
-            <div class="kpi-value" id="kpiTrees">0</div>
-            <div>Trees</div>
-          </div>
+          <div class="kpi kpi-blue"><div class="kpi-value" id="kpiFlights">0</div><div>Total Flights</div></div>
+          <div class="kpi kpi-red"><div class="kpi-value" id="kpiCO2">0 kg</div><div>Total CO₂</div></div>
+          <div class="kpi kpi-purple"><div class="kpi-value" id="kpiKm">0 km</div><div>Distance</div></div>
+          <div class="kpi kpi-green"><div class="kpi-value" id="kpiTrees">0</div><div>Trees</div></div>
         </section>
         <section class="content-grid">
           <div class="card"><canvas id="co2Chart"></canvas></div>
-          <div class="card">
-            <div class="card-title">Recent Flights</div>
-            <ul id="recentFlights" class="flight-list"></ul>
-          </div>
+          <div class="card"><div class="card-title">Recent Flights</div><ul id="recentFlights" class="flight-list"></ul></div>
         </section>
       </section>
 
@@ -180,28 +104,21 @@
         <section class="content-grid">
           <div class="card">
             <form id="addFlightForm" class="form-grid">
-              <label>From <input type="text" name="from" placeholder="SFO or @37.62,-122.38" required /></label>
-              <label>To <input type="text" name="to" placeholder="LAX or @33.94,-118.41" required /></label>
-              <div class="hint">Tip: Use IATA (e.g., <b>SFO</b>, <b>LAX</b>, <b>JFK</b>) or ICAO (e.g., <b>KSFO</b>), or a literal like <span style="font-family:ui-monospace">@lat,lon</span>.</div>
+              <label>From <input type="text" name="from" placeholder="IATA/ICAO or @lat,lon" required /></label>
+              <label>To <input type="text" name="to" placeholder="IATA/ICAO or @lat,lon" required /></label>
+              <div class="hint" id="airportLoadStatus">Loading global airport database…</div>
               <label>Date <input type="date" name="date" required /></label>
               <label>Airline <input type="text" name="airline" /></label>
               <label>Code <input type="text" name="code" /></label>
               <label>Aircraft
-                <select name="aircraft">
-                  <option value="narrow">Narrow</option>
-                  <option value="wide">Wide</option>
-                </select>
+                <select name="aircraft"><option value="narrow">Narrow</option><option value="wide">Wide</option></select>
               </label>
               <label>Cabin
-                <select name="cabin">
-                  <option value="economy">Economy</option>
-                  <option value="business">Business</option>
-                  <option value="first">First</option>
-                </select>
+                <select name="cabin"><option value="economy">Economy</option><option value="business">Business</option><option value="first">First</option></select>
               </label>
               <!-- Distance auto-calculated -->
               <label>Distance (km) <input type="number" name="km" readonly placeholder="— auto —" /></label>
-              <div id="placeWarn" class="warn" style="display:none">Enter valid places (IATA/ICAO or @lat,lon) for both From and To.</div>
+              <div id="placeWarn" class="warn" style="display:none">Enter a valid airport code (IATA/ICAO) or @lat,lon for both From and To.</div>
               <button type="submit" class="btn-green">Add Flight</button>
             </form>
           </div>
@@ -223,18 +140,9 @@
           <div class="card impact-card grid-span" id="impactCard">
             <div class="impact-title">🌲 Environmental Impact</div>
             <div class="impact-grid">
-              <div class="impact-item">
-                <div class="impact-value" id="impactTotalCo2">0</div>
-                <div class="impact-label">kg CO₂ emissions</div>
-              </div>
-              <div class="impact-item">
-                <div class="impact-value" id="impactTrees">0</div>
-                <div class="impact-label">trees needed for offset</div>
-              </div>
-              <div class="impact-item">
-                <div class="impact-value" id="impactAvg">0</div>
-                <div class="impact-label">avg kg CO₂ per flight</div>
-              </div>
+              <div class="impact-item"><div class="impact-value" id="impactTotalCo2">0</div><div class="impact-label">kg CO₂ emissions</div></div>
+              <div class="impact-item"><div class="impact-value" id="impactTrees">0</div><div class="impact-label">trees needed for offset</div></div>
+              <div class="impact-item"><div class="impact-value" id="impactAvg">0</div><div class="impact-label">avg kg CO₂ per flight</div></div>
             </div>
             <div class="hint" id="impactHint">Includes saved flights. (Updates live as you type.)</div>
           </div>
@@ -244,93 +152,108 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script>
-      // (FYI) Live state data (used elsewhere if needed): OpenSky 'states' feed: https://opensky-network.org/api/states/all
-
-      // --- Minimal airport DB (expand anytime) ---
-      const AIRPORTS = {
-        "SFO": [37.6213, -122.3790, "KSFO"],
-        "LAX": [33.9416, -118.4085, "KLAX"],
-        "JFK": [40.6413,  -73.7781, "KJFK"],
-        "EWR": [40.6895,  -74.1745, "KEWR"],
-        "ORD": [41.9742,  -87.9073, "KORD"],
-        "SEA": [47.4502, -122.3088, "KSEA"],
-        "DFW": [32.8998,  -97.0403, "KDFW"],
-        "DEN": [39.8561, -104.6737, "KDEN"],
-        "ATL": [33.6407,  -84.4277, "KATL"],
-        "BOS": [42.3656,  -71.0096, "KBOS"],
-        "SJC": [37.3639, -121.9289, "KSJC"],
-        "DEL": [28.5562,   77.1000, "VIDP"],
-        "LHR": [51.4700,   -0.4543, "EGLL"],
-        "CDG": [49.0097,    2.5479, "LFPG"],
-        "DXB": [25.2532,   55.3657, "OMDB"],
-        "SIN": [ 1.3644,  103.9915, "WSSS"],
-        "SYD": [-33.9399, 151.1753, "YSSY"],
-        "HND": [35.5494,  139.7798, "RJTT"],
-        "NRT": [35.7719,  140.3929, "RJAA"],
-        "YYZ": [43.6777,  -79.6248, "CYYZ"]
+      // ---------- Global airport dataset (IATA + ICAO) ----------
+      // Loads once from jsDelivr (mwgg/Airports). Falls back to a tiny built-in set if it fails.
+      let IATA_MAP = new Map();  // "IAD" -> [lat, lon]
+      let ICAO_MAP = new Map();  // "KIAD" -> [lat, lon]
+      const builtInFallback = { // just a safety net (additions welcome)
+        "SFO":[37.6213,-122.3790,"KSFO"], "LAX":[33.9416,-118.4085,"KLAX"],
+        "JFK":[40.6413,-73.7781,"KJFK"],  "IAD":[38.9531,-77.4565,"KIAD"],
+        "SEA":[47.4502,-122.3088,"KSEA"], "DEL":[28.5562,77.1000,"VIDP"]
       };
 
-      function lookupAirport(place) {
+      async function loadAirports(){
+        const statusEl = document.getElementById("airportLoadStatus");
+        try{
+          statusEl.textContent = "Loading global airport database…";
+          const resp = await fetch("https://cdn.jsdelivr.net/gh/mwgg/Airports/airports.json", { cache: "force-cache" });
+          const data = await resp.json();
+          IATA_MAP = new Map();
+          ICAO_MAP = new Map();
+          for (const icao in data){
+            const rec = data[icao];
+            const lat = Number(rec.lat ?? rec.latitude);
+            const lon = Number(rec.lon ?? rec.longitude);
+            if (!Number.isFinite(lat) || !Number.isFinite(lon)) continue;
+            const ICAO = icao.toUpperCase();
+            ICAO_MAP.set(ICAO, [lat, lon]);
+            const IATA = (rec.iata || rec.IATA || "").toUpperCase();
+            if (IATA) IATA_MAP.set(IATA, [lat, lon]);
+          }
+          statusEl.textContent = `Loaded ${IATA_MAP.size.toLocaleString()} airports (IATA), ${ICAO_MAP.size.toLocaleString()} (ICAO).`;
+          statusEl.style.color = "#14532d";
+          estimate(); // re-evaluate if user already typed codes
+        }catch(err){
+          console.error("Airport DB load failed:", err);
+          statusEl.textContent = "Could not load the global airport list. Using a small built-in set.";
+          statusEl.style.color = "#b91c1c";
+          // seed maps with fallback set
+          Object.entries(builtInFallback).forEach(([iata, [lat,lon,icao]])=>{
+            IATA_MAP.set(iata, [lat,lon]);
+            if (icao) ICAO_MAP.set(icao, [lat,lon]);
+          });
+        }
+      }
+      loadAirports();
+
+      // ---------- Lookup & distance ----------
+      function lookupAirport(place){
         if (!place) return null;
         const p = place.trim().toUpperCase();
 
         // @lat,lon literal
-        if (p.startsWith("@")) {
+        if (p.startsWith("@")){
           const parts = p.slice(1).split(",");
-          if (parts.length === 2) {
-            const lat = parseFloat(parts[0]);
-            const lon = parseFloat(parts[1]);
-            if (Number.isFinite(lat) && Number.isFinite(lon)) return [lat, lon];
+          if (parts.length === 2){
+            const lat = parseFloat(parts[0]); const lon = parseFloat(parts[1]);
+            if (Number.isFinite(lat) && Number.isFinite(lon)) return [lat,lon];
           }
           return null;
         }
 
-        // IATA direct
-        if (AIRPORTS[p]) return [AIRPORTS[p][0], AIRPORTS[p][1]];
+        // IATA then ICAO
+        if (IATA_MAP.has(p)) return IATA_MAP.get(p);
+        if (ICAO_MAP.has(p)) return ICAO_MAP.get(p);
 
-        // ICAO match by scanning values
-        for (const iata in AIRPORTS) {
-          const icao = AIRPORTS[iata][2];
-          if (icao && icao.toUpperCase() === p) return [AIRPORTS[iata][0], AIRPORTS[iata][1]];
+        // last resort: built-in fallback
+        if (builtInFallback[p]) return [builtInFallback[p][0], builtInFallback[p][1]];
+        for (const k in builtInFallback){
+          if (builtInFallback[k][2] && builtInFallback[k][2].toUpperCase() === p)
+            return [builtInFallback[k][0], builtInFallback[k][1]];
         }
         return null;
       }
 
-      // Haversine great-circle distance
       const R_KM = 6371;
-      const toRad = (deg) => deg * Math.PI / 180;
-      function haversineKm(a, b) {
-        const [lat1, lon1] = a, [lat2, lon2] = b;
-        const dLat = toRad(lat2 - lat1);
-        const dLon = toRad(lon2 - lon1);
-        const h = Math.sin(dLat/2)**2 +
-                  Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-                  Math.sin(dLon/2)**2;
-        return 2 * R_KM * Math.asin(Math.sqrt(h));
+      const toRad = (deg)=>deg*Math.PI/180;
+      function haversineKm(a,b){
+        const [lat1,lon1]=a,[lat2,lon2]=b;
+        const dLat=toRad(lat2-lat1), dLon=toRad(lon2-lon1);
+        const h = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
+        return 2*R_KM*Math.asin(Math.sqrt(h));
       }
 
-      // Demo saved flights
+      // ---------- Demo data (unchanged) ----------
       const recent = [
-        { airline: "British Airways", code: "BA112", from: "New York", to: "London", when: "Dec 14, 2024", km: 5585, cabin: "economy", co2kg: 1089, type: "long haul" },
-        { airline: "Air France", code: "AF1234", from: "Paris", to: "Madrid", when: "Nov 30, 2024", km: 1050, cabin: "economy", co2kg: 210, type: "short haul" },
-        { airline: "United Airlines", code: "UA415", from: "San Francisco", to: "Seattle", when: "Nov 22, 2024", km: 1091, cabin: "economy", co2kg: 196, type: "short haul" },
+        { airline:"British Airways", code:"BA112", from:"New York", to:"London", when:"Dec 14, 2024", km:5585, cabin:"economy", co2kg:1089, type:"long haul" },
+        { airline:"Air France", code:"AF1234", from:"Paris", to:"Madrid", when:"Nov 30, 2024", km:1050, cabin:"economy", co2kg:210, type:"short haul" },
+        { airline:"United Airlines", code:"UA415", from:"San Francisco", to:"Seattle", when:"Nov 22, 2024", km:1091, cabin:"economy", co2kg:196, type:"short haul" },
       ];
-      const monthly = { labels: ["Sep 2024","Oct 2024","Nov 2024","Dec 2024"], co2kg: [900,2100,4800,1300] };
+      const monthly = { labels:["Sep 2024","Oct 2024","Nov 2024","Dec 2024"], co2kg:[900,2100,4800,1300] };
 
-      const sum = (a) => a.reduce((x, y) => x + y, 0);
-      const fmt = (n, u = "") => `${n.toLocaleString()}${u}`;
+      const sum = (a)=>a.reduce((x,y)=>x+y,0);
+      const fmt = (n,u="")=>`${n.toLocaleString()}${u}`;
 
       const ul = document.getElementById("recentFlights");
-
-      function renderKpis() {
+      function renderKpis(){
         document.getElementById("kpiFlights").textContent = recent.length;
-        document.getElementById("kpiCO2").textContent = fmt(sum(recent.map(r => r.co2kg)), " kg");
-        document.getElementById("kpiKm").textContent = fmt(sum(recent.map(r => r.km)), " km");
-        document.getElementById("kpiTrees").textContent = Math.round(sum(recent.map(r => r.co2kg)) / 22);
+        document.getElementById("kpiCO2").textContent = fmt(sum(recent.map(r=>r.co2kg))," kg");
+        document.getElementById("kpiKm").textContent = fmt(sum(recent.map(r=>r.km))," km");
+        document.getElementById("kpiTrees").textContent = Math.round(sum(recent.map(r=>r.co2kg))/22);
       }
-      function renderList() {
+      function renderList(){
         ul.innerHTML = "";
-        recent.forEach((r) => {
+        recent.forEach(r=>{
           ul.innerHTML += `<li class="flight">
             <div>✈️</div>
             <div>
@@ -345,79 +268,73 @@
 
       // Chart
       new Chart(document.getElementById("co2Chart"), {
-        type: "bar",
-        data: { labels: monthly.labels, datasets: [{ label: "CO₂ (kg)", data: monthly.co2kg, borderRadius: 10 }] },
-        options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } },
+        type:"bar",
+        data:{ labels:monthly.labels, datasets:[{ label:"CO₂ (kg)", data:monthly.co2kg, borderRadius:10 }] },
+        options:{ responsive:true, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true } } },
       });
 
       // View toggles
       const dash = document.getElementById("dashboardSection");
-      const add = document.getElementById("addFlightSection");
-      document.getElementById("addFlightBtn").onclick = () => { dash.classList.add("hidden"); add.classList.remove("hidden"); };
-      document.getElementById("dashboardLink").onclick = (e) => { e.preventDefault(); add.classList.add("hidden"); dash.classList.remove("hidden"); };
+      const add  = document.getElementById("addFlightSection");
+      document.getElementById("addFlightBtn").onclick = ()=>{ dash.classList.add("hidden"); add.classList.remove("hidden"); };
+      document.getElementById("dashboardLink").onclick = (e)=>{ e.preventDefault(); add.classList.add("hidden"); dash.classList.remove("hidden"); };
 
-      // -------- Add Flight logic --------
+      // -------- Add Flight logic (auto distance + estimates + impact) --------
       const form = document.getElementById("addFlightForm");
       const warn = document.getElementById("placeWarn");
 
-      function computeKmFromPlaces() {
+      function computeKmFromPlaces(){
         const a = lookupAirport(form.from.value);
         const b = lookupAirport(form.to.value);
-        if (!a || !b) {
+        if (!a || !b){
           warn.style.display = (form.from.value || form.to.value) ? "block" : "none";
           form.km.value = "";
           return 0;
         }
         warn.style.display = "none";
-        const km = Math.round(haversineKm(a, b));
+        const km = Math.round(haversineKm(a,b));
         form.km.value = km;
         return km;
       }
 
-      function estimate() {
+      function estimate(){
         const km = computeKmFromPlaces();
         const cabin = form.cabin.value;
         const ac = form.aircraft.value;
 
-        let f = 0.18; // demo emission factor kg/km
+        let f = 0.18;             // demo emission factor kg/km
         if (ac === "wide") f *= 1.05;
         if (cabin === "business") f *= 2;
-        if (cabin === "first") f *= 3;
+        if (cabin === "first")    f *= 3;
 
         const co2 = Math.round(km * f);
         const trees = Math.round(co2 / 22);
 
         document.getElementById("estimateCO2").textContent = `${co2.toLocaleString()} kg`;
         document.getElementById("estimateMeta").textContent = `Distance: ${km.toLocaleString()} km • Trees: ${trees.toLocaleString()}`;
-        document.getElementById("perspCar").textContent = Math.round(co2 / 0.12).toLocaleString();
-        document.getElementById("perspTrees").textContent = trees.toLocaleString();
+        document.getElementById("perspCar").textContent    = Math.round(co2 / 0.12).toLocaleString();
+        document.getElementById("perspTrees").textContent  = trees.toLocaleString();
         document.getElementById("perspEnergy").textContent = Math.round(co2 / 300).toLocaleString();
 
         updateImpact(true, co2); // live preview includes current entry
         return { km, co2 };
       }
 
-      // Environmental Impact: recompute totals; if preview=true, include current flight estimate
-      function updateImpact(preview = false, currentCo2 = 0) {
-        const totalSaved = sum(recent.map(r => r.co2kg));
+      function updateImpact(preview=false, currentCo2=0){
+        const totalSaved = sum(recent.map(r=>r.co2kg));
         const flightsSaved = recent.length;
-
         const total = preview ? totalSaved + (currentCo2 || 0) : totalSaved;
         const flights = preview ? flightsSaved + (currentCo2 > 0 ? 1 : 0) : flightsSaved;
-
         const trees = Math.round(total / 22);
         const avg = flights ? Math.round(total / flights) : 0;
 
         document.getElementById("impactTotalCo2").textContent = total.toLocaleString();
-        document.getElementById("impactTrees").textContent = trees.toLocaleString();
-        document.getElementById("impactAvg").textContent = avg.toLocaleString();
-
-        document.getElementById("impactHint").textContent =
-          preview ? "Includes saved flights + this entry (live preview)." : "Includes saved flights.";
+        document.getElementById("impactTrees").textContent    = trees.toLocaleString();
+        document.getElementById("impactAvg").textContent      = avg.toLocaleString();
+        document.getElementById("impactHint").textContent     = preview ? "Includes saved flights + this entry (live preview)." : "Includes saved flights.";
       }
 
-      // Recalculate on relevant changes
-      ["input","change","blur"].forEach(ev => {
+      ["input","change","blur"].forEach(ev=>{
         form.from.addEventListener(ev, estimate);
         form.to.addEventListener(ev, estimate);
         form.cabin.addEventListener(ev, estimate);
@@ -427,10 +344,10 @@
         form.code.addEventListener(ev, estimate);
       });
 
-      form.onsubmit = (e) => {
+      form.onsubmit = (e)=>{
         e.preventDefault();
         const { km, co2 } = estimate();
-        if (!km) { warn.style.display = "block"; return; }
+        if (!km){ warn.style.display = "block"; return; }
 
         recent.unshift({
           airline: form.airline.value || "Airline",
@@ -438,17 +355,14 @@
           from: form.from.value,
           to: form.to.value,
           when: new Date(form.date.value).toLocaleDateString(),
-          km,
-          co2kg: co2,
-          cabin: form.cabin.value,
+          km, co2kg: co2, cabin: form.cabin.value,
           type: km > 3500 ? "long haul" : "short haul",
         });
 
         renderKpis();
         renderList();
-        updateImpact(false); // saved totals only
+        updateImpact(false);
 
-        // return to dashboard
         add.classList.add("hidden");
         dash.classList.remove("hidden");
         form.reset();
@@ -460,11 +374,18 @@
         warn.style.display = "none";
       };
 
-      // Initial paint with demo flights
-      renderKpis();
-      renderList();
-      estimate();       // also initializes live preview
-      updateImpact(false);
+      // Initial UI
+      (function init(){
+        // quick demo: prefill IAD → SFO so you can test right away
+        try {
+          form.from.value = "IAD";
+          form.to.value = "SFO";
+        } catch {}
+        renderKpis();
+        renderList();
+        estimate();
+        updateImpact(false);
+      })();
     </script>
   </body>
 </html>
