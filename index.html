@@ -234,11 +234,14 @@
 
     // ===== Form + estimates =====
     const form=document.getElementById("addFlightForm");
-    function computeKm(){
-      const a=lookupAirport(form.from.value), b=lookupAirport(form.to.value);
-      if(!a||!b){form.km.value=""; return 0;}
-      const km=Math.round(haversine(a,b)); form.km.value=km; return km;
-    }
+    
+  function computeKm(){
+  const a = lookupAirport(form.from.value), b = lookupAirport(form.to.value);
+  if(!a || !b) return 0;
+  const km = Math.round(haversine(a,b));
+  return km;
+}
+
     function estimate(){
       const km=computeKm(), cabin=form.cabin.value, ac=form.aircraft.value;
       let f=0.18;
