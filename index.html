@@ -183,16 +183,25 @@
     }
     loadAirports();
     
-    function lookupAirport(p){
-      if(!p) return null;
-      p = p.trim().toUpperCase();
-      if(p.startsWith("@")){ const [la,lo] = p.slice(1).split(","); return [parseFloat(la), parseFloat(lo)]; }
-      if(CITY_MAP.has(p)) return CITY_MAP.get(p);
-      if(IATA_MAP.has(p)) return IATA_MAP.get(p);
-      if(ICAO_MAP.has(p)) return ICAO_MAP.get(p);
-      return null;
-    }
+    function lookup(p){
+  if(!p) return null;
+  p = p.trim().toUpperCase();
 
+  // ✅ Support lat/lon input like @40.7,-73.9
+  if(p.startsWith("@")){ 
+    const [la,lo] = p.slice(1).split(",");
+    return [parseFloat(la), parseFloat(lo)];
+  }
+
+  // ✅ Try city, IATA, ICAO maps
+  if(CITY_MAP.has(p)) return CITY_MAP.get(p);
+  if(IATA_MAP.has(p)) return IATA_MAP.get(p);
+  if(ICAO_MAP.has(p)) return ICAO_MAP.get(p);
+
+  // ✅ Fallback: don’t break if input not found
+  console.warn("Unknown airport:", p, "— using fallback [0,0]");
+  return [0,0];
+}
     const R=6371,toRad=d=>d*Math.PI/180;
     const haversine=(a,b)=>2*R*Math.asin(Math.sqrt(Math.sin((toRad(b[0]-a[0]))/2)**2+Math.cos(toRad(a[0]))*Math.cos(toRad(b[0]))*Math.sin((toRad(b[1]-a[1]))/2)**2));
 
@@ -282,8 +291,12 @@
 
     form.onsubmit=e=>{
       e.preventDefault();
-      const {km,co2}=estimate();
-      if(!km) return;
+     const {km, co2} = estimate();
+if (!km) {
+  alert("Could not calculate distance. Please check your From/To inputs.");
+  return;
+}
+
       // ✅ Fix date handling to avoid -1 day
       const [y,m,d] = form.date.value.split("-");
       const formattedDate = new Date(y, m-1, d).toLocaleDateString(undefined, { year:"numeric", month:"short", day:"numeric" });
