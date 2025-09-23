@@ -164,53 +164,35 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script>
     // ===== Airport DB =====
-    let IATA_MAP=new Map(), ICAO_MAP=new Map();
-   let CITY_MAP = new Map();
+    let IATA_MAP=new Map(), ICAO_MAP=new Map(), CITY_MAP = new Map();
 
-async function loadAirports(){
-  try{
-    const resp = await fetch("https://cdn.jsdelivr.net/gh/mwgg/Airports/airports.json");
-    const data = await resp.json();
-    for(const icao in data){
-      const r = data[icao];
-      const lat = +r.lat, lon = +r.lon;
-      if(!Number.isFinite(lat) || !Number.isFinite(lon)) continue;
+    async function loadAirports(){
+      try{
+        const resp = await fetch("https://cdn.jsdelivr.net/gh/mwgg/Airports/airports.json");
+        const data = await resp.json();
+        for(const icao in data){
+          const r = data[icao];
+          const lat = +r.lat, lon = +r.lon;
+          if(!Number.isFinite(lat) || !Number.isFinite(lon)) continue;
 
-      // store ICAO + IATA
-      ICAO_MAP.set(icao.toUpperCase(), [lat,lon]);
-      if(r.iata) IATA_MAP.set(r.iata.toUpperCase(), [lat,lon]);
-
-      // store city → airport
-      if(r.city){
-        CITY_MAP.set(r.city.toUpperCase(), [lat,lon]);
-      }
+          ICAO_MAP.set(icao.toUpperCase(), [lat,lon]);
+          if(r.iata) IATA_MAP.set(r.iata.toUpperCase(), [lat,lon]);
+          if(r.city){ CITY_MAP.set(r.city.toUpperCase(), [lat,lon]); }
+        }
+      }catch(e){ console.error("Airport DB load failed", e); }
     }
-  }catch(e){
-    console.error("Airport DB load failed", e);
-  }
-}
     loadAirports();
     
-function lookupAirport(p){
-  if(!p) return null;
-  p = p.trim().toUpperCase();
+    function lookupAirport(p){
+      if(!p) return null;
+      p = p.trim().toUpperCase();
+      if(p.startsWith("@")){ const [la,lo] = p.slice(1).split(","); return [parseFloat(la), parseFloat(lo)]; }
+      if(CITY_MAP.has(p)) return CITY_MAP.get(p);
+      if(IATA_MAP.has(p)) return IATA_MAP.get(p);
+      if(ICAO_MAP.has(p)) return ICAO_MAP.get(p);
+      return null;
+    }
 
-  // Allow @lat,lon
-  if(p.startsWith("@")){
-    const [la,lo] = p.slice(1).split(",");
-    return [parseFloat(la), parseFloat(lo)];
-  }
-
-  // Look up city
-  if(CITY_MAP.has(p)) return CITY_MAP.get(p);
-
-  // Look up IATA / ICAO
-  if(IATA_MAP.has(p)) return IATA_MAP.get(p);
-  if(ICAO_MAP.has(p)) return ICAO_MAP.get(p);
-
-  return null;
-}
-    
     const R=6371,toRad=d=>d*Math.PI/180;
     const haversine=(a,b)=>2*R*Math.asin(Math.sqrt(Math.sin((toRad(b[0]-a[0]))/2)**2+Math.cos(toRad(a[0]))*Math.cos(toRad(b[0]))*Math.sin((toRad(b[1]-a[1]))/2)**2));
 
@@ -255,12 +237,11 @@ function lookupAirport(p){
     // ===== Form + estimates =====
     const form=document.getElementById("addFlightForm");
     
-  function computeKm(){
-  const a = lookupAirport(form.from.value), b = lookupAirport(form.to.value);
-  if(!a || !b) return 0;
-  const km = Math.round(haversine(a,b));
-  return km;
-}
+    function computeKm(){
+      const a = lookupAirport(form.from.value), b = lookupAirport(form.to.value);
+      if(!a || !b) return 0;
+      return Math.round(haversine(a,b));
+    }
 
     function estimate(){
       const km=computeKm(), cabin=form.cabin.value, ac=form.aircraft.value;
@@ -277,6 +258,16 @@ function lookupAirport(p){
       updateImpact(true,co2);
       return {km,co2};
     }
+
+    function resetEstimateUI(){
+      document.getElementById("estimateCO2").textContent="0 kg";
+      document.getElementById("estimateMeta").textContent="Distance: 0 km • Trees: 0";
+      document.getElementById("perspCar").textContent="0";
+      document.getElementById("perspTrees").textContent="0";
+      document.getElementById("perspEnergy").textContent="0";
+      updateImpact(false);
+    }
+
     function updateImpact(preview=false,current=0){
       const totalSaved=sum(recent.map(r=>r.co2kg)), flights=recent.length;
       const total=preview?totalSaved+current:totalSaved;
@@ -288,6 +279,7 @@ function lookupAirport(p){
     }
 
     ["input","change"].forEach(ev=>["from","to","cabin","aircraft"].forEach(n=>form[n].addEventListener(ev,estimate)));
+
     form.onsubmit=e=>{
       e.preventDefault();
       const {km,co2}=estimate();
@@ -302,7 +294,7 @@ function lookupAirport(p){
       });
       renderKpis(); renderList(); updateImpact(false);
       dash.classList.remove("hidden"); add.classList.add("hidden");
-      form.reset(); estimate();
+      form.reset(); resetEstimateUI(); // reset preview to 0s
     };
 
     // ===== Init =====
@@ -310,4 +302,5 @@ function lookupAirport(p){
   </script>
 </body>
 </html>
+
 
