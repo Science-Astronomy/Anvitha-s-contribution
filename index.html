@@ -165,32 +165,52 @@
   <script>
     // ===== Airport DB =====
     let IATA_MAP=new Map(), ICAO_MAP=new Map();
-    async function loadAirports(){
-      try{
-        const resp=await fetch("https://cdn.jsdelivr.net/gh/mwgg/Airports/airports.json");
-        const data=await resp.json();
-        for(const icao in data){
-          const r=data[icao];
-          const lat=+r.lat, lon=+r.lon;
-          if(!Number.isFinite(lat)||!Number.isFinite(lon)) continue;
-          ICAO_MAP.set(icao.toUpperCase(),[lat,lon]);
-          if(r.iata) IATA_MAP.set(r.iata.toUpperCase(),[lat,lon]);
-        }
-      }catch(e){console.error("Airport DB load failed",e);}
-    }
-    loadAirports();
+   let CITY_MAP = new Map();
 
-    function lookupAirport(p){
-      if(!p) return null;
-      p=p.trim().toUpperCase();
-      if(p.startsWith("@")){
-        const [la,lo]=p.slice(1).split(",");
-        return [parseFloat(la),parseFloat(lo)];
+async function loadAirports(){
+  try{
+    const resp = await fetch("https://cdn.jsdelivr.net/gh/mwgg/Airports/airports.json");
+    const data = await resp.json();
+    for(const icao in data){
+      const r = data[icao];
+      const lat = +r.lat, lon = +r.lon;
+      if(!Number.isFinite(lat) || !Number.isFinite(lon)) continue;
+
+      // store ICAO + IATA
+      ICAO_MAP.set(icao.toUpperCase(), [lat,lon]);
+      if(r.iata) IATA_MAP.set(r.iata.toUpperCase(), [lat,lon]);
+
+      // store city → airport
+      if(r.city){
+        CITY_MAP.set(r.city.toUpperCase(), [lat,lon]);
       }
-      if(IATA_MAP.has(p)) return IATA_MAP.get(p);
-      if(ICAO_MAP.has(p)) return ICAO_MAP.get(p);
-      return null;
     }
+  }catch(e){
+    console.error("Airport DB load failed", e);
+  }
+}
+    loadAirports();
+    
+function lookupAirport(p){
+  if(!p) return null;
+  p = p.trim().toUpperCase();
+
+  // Allow @lat,lon
+  if(p.startsWith("@")){
+    const [la,lo] = p.slice(1).split(",");
+    return [parseFloat(la), parseFloat(lo)];
+  }
+
+  // Look up city
+  if(CITY_MAP.has(p)) return CITY_MAP.get(p);
+
+  // Look up IATA / ICAO
+  if(IATA_MAP.has(p)) return IATA_MAP.get(p);
+  if(ICAO_MAP.has(p)) return ICAO_MAP.get(p);
+
+  return null;
+}
+    
     const R=6371,toRad=d=>d*Math.PI/180;
     const haversine=(a,b)=>2*R*Math.asin(Math.sqrt(Math.sin((toRad(b[0]-a[0]))/2)**2+Math.cos(toRad(a[0]))*Math.cos(toRad(b[0]))*Math.sin((toRad(b[1]-a[1]))/2)**2));
 
