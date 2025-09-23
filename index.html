@@ -284,17 +284,21 @@
       e.preventDefault();
       const {km,co2}=estimate();
       if(!km) return;
+      // ✅ Fix date handling to avoid -1 day
+      const [y,m,d] = form.date.value.split("-");
+      const formattedDate = new Date(y, m-1, d).toLocaleDateString(undefined, { year:"numeric", month:"short", day:"numeric" });
+      
       recent.unshift({
         airline: form.airline.value||"Airline",
         code: (form.code.value||"NEW").toUpperCase(),
         from: form.from.value, to: form.to.value,
-        when: new Date(form.date.value).toLocaleDateString(),
+        when: formattedDate,
         km, co2kg: co2, cabin: form.cabin.value,
         type: km>3500?"long haul":"short haul"
       });
       renderKpis(); renderList(); updateImpact(false);
       dash.classList.remove("hidden"); add.classList.add("hidden");
-      form.reset(); resetEstimateUI(); // reset preview to 0s
+      form.reset(); resetEstimateUI();
     };
 
     // ===== Init =====
@@ -302,5 +306,3 @@
   </script>
 </body>
 </html>
-
-
