@@ -66,6 +66,15 @@
     .impact-item{background:rgba(255,255,255,.25);border-radius:12px;padding:12px}
     .impact-value{font-size:22px;font-weight:800}
     .impact-label{font-size:12px;opacity:.9}
+
+    /* 🎮 Games footer buttons */
+    .games-footer { text-align:center; margin-top: 28px; }
+    .game-btn {
+      display:inline-block; margin:10px; padding:10px 14px;
+      border-radius:12px; background:linear-gradient(135deg,#2563eb,#60a5fa);
+      color:#fff; font-weight:600; text-decoration:none; box-shadow:var(--shadow);
+    }
+    .game-btn:hover { opacity:0.9; }
   </style>
 </head>
 <body>
@@ -102,7 +111,15 @@
         <div class="card"><canvas id="co2Chart"></canvas></div>
         <div class="card"><div class="card-title">Recent Flights</div><ul id="recentFlights" class="flight-list"></ul></div>
       </section>
+
+      <!-- 🎮 Two game buttons at the very bottom -->
+      <div class="games-footer">
+        <h3>🎮 Play Games</h3>
+        <a href="https://frolicking-figolla-f0826a.netlify.app/" target="_blank" class="game-btn">Escape Room</a>
+        <a href="https://spoopygamer.netlify.app/" target="_blank" class="game-btn">Spoopy Gamer</a>
+      </div>
     </section>
+
     <!-- Add Flight -->
     <section id="addFlightSection" class="hidden">
       <header class="page-header"><h1>Add New Flight</h1></header>
@@ -148,7 +165,6 @@
           <div class="persp-box"> 🏠 <div>Home energy</div><div><span id="perspEnergy">0</span> months</div></div>
         </div>
 
-        <!-- 🌲 New Environmental Impact card -->
         <div class="card impact-card">
           <div class="impact-title">🌲 Environmental Impact</div>
           <div class="impact-grid">
@@ -161,7 +177,8 @@
       </section>
     </section>
   </main>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script>
     // ===== Airport DB =====
     let IATA_MAP=new Map(), ICAO_MAP=new Map(), CITY_MAP = new Map();
@@ -183,25 +200,25 @@
     }
     loadAirports();
     
-    function lookup(p){
-  if(!p) return null;
-  p = p.trim().toUpperCase();
+    // ✅ Name restored to lookupAirport to match callers
+    function lookupAirport(p){
+      if(!p) return null;
+      p = p.trim().toUpperCase();
 
-  // ✅ Support lat/lon input like @40.7,-73.9
-  if(p.startsWith("@")){ 
-    const [la,lo] = p.slice(1).split(",");
-    return [parseFloat(la), parseFloat(lo)];
-  }
+      // Support @lat,lon
+      if(p.startsWith("@")){ 
+        const [la,lo] = p.slice(1).split(",");
+        return [parseFloat(la), parseFloat(lo)];
+      }
 
-  // ✅ Try city, IATA, ICAO maps
-  if(CITY_MAP.has(p)) return CITY_MAP.get(p);
-  if(IATA_MAP.has(p)) return IATA_MAP.get(p);
-  if(ICAO_MAP.has(p)) return ICAO_MAP.get(p);
+      if(CITY_MAP.has(p)) return CITY_MAP.get(p);
+      if(IATA_MAP.has(p)) return IATA_MAP.get(p);
+      if(ICAO_MAP.has(p)) return ICAO_MAP.get(p);
 
-  // ✅ Fallback: don’t break if input not found
-  console.warn("Unknown airport:", p, "— using fallback [0,0]");
-  return [0,0];
-}
+      console.warn("Unknown airport:", p);
+      return null;
+    }
+
     const R=6371,toRad=d=>d*Math.PI/180;
     const haversine=(a,b)=>2*R*Math.asin(Math.sqrt(Math.sin((toRad(b[0]-a[0]))/2)**2+Math.cos(toRad(a[0]))*Math.cos(toRad(b[0]))*Math.sin((toRad(b[1]-a[1]))/2)**2));
 
@@ -291,13 +308,12 @@
 
     form.onsubmit=e=>{
       e.preventDefault();
-     const {km, co2} = estimate();
-if (!km) {
-  alert("Could not calculate distance. Please check your From/To inputs.");
-  return;
-}
-
-      // ✅ Fix date handling to avoid -1 day
+      const {km, co2} = estimate();
+      if (!km) {
+        alert("Could not calculate distance. Please check your From/To inputs.");
+        return;
+      }
+      // Fix date handling (local time, no -1 day)
       const [y,m,d] = form.date.value.split("-");
       const formattedDate = new Date(y, m-1, d).toLocaleDateString(undefined, { year:"numeric", month:"short", day:"numeric" });
       
