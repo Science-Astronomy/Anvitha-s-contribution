@@ -106,11 +106,7 @@
         <div class="kpi kpi-red"><div class="kpi-value" id="kpiCO2">0 kg</div><div>Total CO₂</div></div>
         <div class="kpi kpi-purple"><div class="kpi-value" id="kpiKm">0 km</div><div>Distance</div></div>
         <div class="kpi kpi-green"><div class="kpi-value" id="kpiTrees">0</div><div>Trees</div></div>
-      </section>
-      <section class="content-grid">
-        <div class="card"><canvas id="co2Chart"></canvas></div>
-        <div class="card"><div class="card-title">Recent Flights</div><ul id="recentFlights" class="flight-list"></ul></div>
-      </section>
+      
 
       <!-- 🎮 Two game buttons at the very bottom -->
       <div class="games-footer">
@@ -249,12 +245,7 @@
         <div><div class="badge">${r.co2kg} kg CO₂</div></div>
       </li>`);
     }
-    new Chart(document.getElementById("co2Chart"),{
-      type:"bar",
-      data:{labels:monthly.labels,datasets:[{label:"CO₂ (kg)",data:monthly.co2kg,borderRadius:10}]},
-      options:{plugins:{legend:{display:false}}}
-    });
-
+    
     // ===== Navigation =====
     const dash=document.getElementById("dashboardSection"), add=document.getElementById("addFlightSection");
     document.getElementById("addFlightBtn").onclick=()=>{dash.classList.add("hidden");add.classList.remove("hidden");};
