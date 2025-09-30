@@ -311,13 +311,6 @@
 
       const form = document.getElementById("flightForm");
 
-form.onsubmit = e => {
-  e.preventDefault();
-  saveFlight();
-  renderKpis();
-  renderList();
-  updateImpact(false);
-};
       recent.unshift({
         airline: form.airline.value||"Airline",
         code: (form.code.value||"NEW").toUpperCase(),
@@ -326,14 +319,16 @@ form.onsubmit = e => {
         km, co2kg: co2, cabin: form.cabin.value,
         type: km>3500?"long haul":"short haul"
       });
-      renderKpis(); renderList(); updateImpact(false);
-      dash.classList.remove("hidden"); add.classList.add("hidden");
-      form.reset(); resetEstimateUI();
+      renderKpis(); 
+      renderList(); 
+      updateImpact(false);
+      updateChart();
+      dash.classList.remove("hidden"); 
+      add.classList.add("hidden");
+      form.reset(); 
+      resetEstimateUI();
     };
     
-
-    // ===== Init =====
-    renderKpis(); renderList(); estimate(); updateImpact(false); updateChart();
   </script>
 </body>
 </html>
