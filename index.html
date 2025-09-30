@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,18 +8,14 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
   <style>
+    /* ===== Styles ===== */
     :root {
       --bg: #f1f8f4;
       --panel: #ffffff;
       --ink: #0f172a;
       --muted: #64748b;
       --line: #e2e8f0;
-      --blue: #2563eb;
-      --red: #ef4444;
-      --purple: #7c3aed;
-      --green: #16a34a;
-      --shadow: 0 10px 20px rgba(2, 6, 23, 0.06),
-        0 2px 6px rgba(2, 6, 23, 0.04);
+      --shadow: 0 10px 20px rgba(2, 6, 23, 0.06), 0 2px 6px rgba(2, 6, 23, 0.04);
     }
     body { margin: 0; font-family: Inter, system-ui, sans-serif; color: var(--ink); background: var(--bg); display: flex; height: 100%; }
     .sidebar { width: 250px; min-height: 100vh; background: #fff; border-right: 1px solid var(--line); display: flex; flex-direction: column; justify-content: space-between; padding: 18px 14px; }
@@ -34,7 +31,6 @@
     .btn-ghost { background: #eef2ff; color: #4338ca; }
     .sidebar-cta { margin-top: auto; display: grid; gap: 8px; place-items: center; padding: 14px; border: 1px dashed #94a3b8; border-radius: 14px; background: #ecfdf5; }
     .page-header h1 { margin: 0 0 4px; font-size: 2rem; color: #166534; }
-
     .kpi-grid { margin-top: 18px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
     .kpi { background: var(--panel); border-radius: 18px; padding: 14px; box-shadow: var(--shadow); }
     .kpi-value { font-size: 28px; font-weight: 700; color: #fff; }
@@ -42,38 +38,27 @@
     .kpi-red { background: linear-gradient(135deg, #dc2626, #fb7185); }
     .kpi-purple { background: linear-gradient(135deg, #7c3aed, #a78bfa); }
     .kpi-green { background: linear-gradient(135deg, #16a34a, #34d399); }
-
     .content-grid { margin-top: 18px; display: grid; grid-template-columns: 2fr 1fr; gap: 18px; }
     .card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow); padding: 16px; }
-
     .flight-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
     .flight { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; padding: 12px; border: 1px solid var(--line); border-radius: 14px; background: #f8fafc; }
     .badge { font-size: 0.75rem; padding: 2px 8px; border-radius: 999px; background: #e2e8f0; }
     .tag { font-size: 0.7rem; padding: 2px 8px; border-radius: 999px; background: #ecfeff; color: #0891b2; margin-left: 6px; }
     .dim { color: var(--muted); }
     .hidden { display: none; }
-
     .form-grid { display: grid; gap: 12px; }
     .form-grid input, .form-grid select { padding: 8px; border: 1px solid var(--line); border-radius: 8px; }
     .btn-green { background: linear-gradient(135deg, #16a34a, #34d399); color: #fff; }
-
     .persp-box { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; background: #f0fdf4; padding: 12px; border-radius: 12px; }
     .persp-box div:last-child { font-weight: 700; color: #14532d; }
-
-    .impact-card { background: linear-gradient(135deg,#16a34a,#60d394); color:#052e16; border:none; margin-top:12px;}
+    .impact-card { background: linear-gradient(135deg,#16a34a,#60d394); color:#052e16; border:none; margin-top:12px; }
     .impact-title{display:flex;align-items:center;gap:8px;font-weight:700}
     .impact-grid{margin-top:8px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
     .impact-item{background:rgba(255,255,255,.25);border-radius:12px;padding:12px}
     .impact-value{font-size:22px;font-weight:800}
     .impact-label{font-size:12px;opacity:.9}
-
-    /* 🎮 Games footer buttons */
     .games-footer { text-align:center; margin-top: 28px; }
-    .game-btn {
-      display:inline-block; margin:10px; padding:10px 14px;
-      border-radius:12px; background:linear-gradient(135deg,#2563eb,#60a5fa);
-      color:#fff; font-weight:600; text-decoration:none; box-shadow:var(--shadow);
-    }
+    .game-btn { display:inline-block; margin:10px; padding:10px 14px; border-radius:12px; background:linear-gradient(135deg,#2563eb,#60a5fa); color:#fff; font-weight:600; text-decoration:none; box-shadow:var(--shadow); }
     .game-btn:hover { opacity:0.9; }
   </style>
 </head>
@@ -106,10 +91,13 @@
         <div class="kpi kpi-red"><div class="kpi-value" id="kpiCO2">0 kg</div><div>Total CO₂</div></div>
         <div class="kpi kpi-purple"><div class="kpi-value" id="kpiKm">0 km</div><div>Distance</div></div>
         <div class="kpi kpi-green"><div class="kpi-value" id="kpiTrees">0</div><div>Trees</div></div>
-        <div class="card"><canvas id="co2Chart"></canvas></div>
-    
+      </section>
 
-      <!-- 🎮 Two game buttons at the very bottom -->
+      <section class="content-grid">
+        <div class="card"><canvas id="co2Chart"></canvas></div>
+        <div class="card"><div class="card-title">Recent Flights</div><ul id="recentFlights" class="flight-list"></ul></div>
+      </section>
+
       <div class="games-footer">
         <h3>🎮 Play Games</h3>
         <a href="https://frolicking-figolla-f0826a.netlify.app/" target="_blank" class="game-btn">Zoomy</a>
@@ -123,12 +111,8 @@
       <section class="content-grid">
         <div class="card">
           <form id="addFlightForm" class="form-grid">
-            <label>From 
-              <input type="text" name="from" placeholder="IATA/ICAO or @lat,lon" required />
-            </label>
-            <label>To 
-              <input type="text" name="to" placeholder="IATA/ICAO or @lat,lon" required />
-            </label>
+            <label>From <input type="text" name="from" placeholder="IATA/ICAO or @lat,lon" required /></label>
+            <label>To <input type="text" name="to" placeholder="IATA/ICAO or @lat,lon" required /></label>
             <label>Date <input type="date" name="date" required /></label>
             <label>Airline <input type="text" name="airline" /></label>
             <label>Code <input type="text" name="code" /></label>
@@ -175,11 +159,12 @@
     </section>
   </main>
 
+  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
   <script>
     // ===== Airport DB =====
-    let IATA_MAP=new Map(), ICAO_MAP=new Map(), CITY_MAP = new Map();
-
+    let IATA_MAP = new Map(), ICAO_MAP = new Map(), CITY_MAP = new Map();
     async function loadAirports(){
       try{
         const resp = await fetch("https://cdn.jsdelivr.net/gh/mwgg/Airports/airports.json");
@@ -188,147 +173,186 @@
           const r = data[icao];
           const lat = +r.lat, lon = +r.lon;
           if(!Number.isFinite(lat) || !Number.isFinite(lon)) continue;
-
           ICAO_MAP.set(icao.toUpperCase(), [lat,lon]);
           if(r.iata) IATA_MAP.set(r.iata.toUpperCase(), [lat,lon]);
-          if(r.city){ CITY_MAP.set(r.city.toUpperCase(), [lat,lon]); }
+          if(r.city) CITY_MAP.set(r.city.toUpperCase(), [lat,lon]);
         }
       }catch(e){ console.error("Airport DB load failed", e); }
     }
     loadAirports();
-    
-    // ✅ Name restored to lookupAirport to match callers
+
     function lookupAirport(p){
       if(!p) return null;
       p = p.trim().toUpperCase();
-
-      // Support @lat,lon
-      if(p.startsWith("@")){ 
+      if(p.startsWith("@")){
         const [la,lo] = p.slice(1).split(",");
         return [parseFloat(la), parseFloat(lo)];
       }
-
       if(CITY_MAP.has(p)) return CITY_MAP.get(p);
       if(IATA_MAP.has(p)) return IATA_MAP.get(p);
       if(ICAO_MAP.has(p)) return ICAO_MAP.get(p);
-
       console.warn("Unknown airport:", p);
       return null;
     }
 
-    const R=6371,toRad=d=>d*Math.PI/180;
-    const haversine=(a,b)=>2*R*Math.asin(Math.sqrt(Math.sin((toRad(b[0]-a[0]))/2)**2+Math.cos(toRad(a[0]))*Math.cos(toRad(b[0]))*Math.sin((toRad(b[1]-a[1]))/2)**2));
+    const R = 6371, toRad = d => d * Math.PI / 180;
+    const haversine = (a, b) => 2 * R * Math.asin(Math.sqrt(Math.sin((toRad(b[0]-a[0]))/2)**2 + Math.cos(toRad(a[0]))*Math.cos(toRad(b[0]))*Math.sin((toRad(b[1]-a[1]))/2)**2));
 
-    // ===== Demo flights =====
-    const recent=[
-      { airline:"British Airways", code:"BA112", from:"New York", to:"London", when:"Dec 14, 2024", km:5585, cabin:"economy", co2kg:1089, type:"long haul" },
-      { airline:"Air France", code:"AF1234", from:"Paris", to:"Madrid", when:"Nov 30, 2024", km:1050, cabin:"economy", co2kg:210, type:"short haul" },
-      { airline:"United Airlines", code:"UA415", from:"San Francisco", to:"Seattle", when:"Nov 22, 2024", km:1091, cabin:"economy", co2kg:196, type:"short haul" }
+    // ===== Demo flights (added dateISO so chart aggregation can use them) =====
+    const recent = [
+      { airline:"British Airways", code:"BA112", from:"New York", to:"London", when:"Dec 14, 2024", dateISO: "2024-12-14", km:5585, cabin:"economy", co2kg:1089, type:"long haul" },
+      { airline:"Air France", code:"AF1234", from:"Paris", to:"Madrid", when:"Nov 30, 2024", dateISO: "2024-11-30", km:1050, cabin:"economy", co2kg:210, type:"short haul" },
+      { airline:"United Airlines", code:"UA415", from:"San Francisco", to:"Seattle", when:"Nov 22, 2024", dateISO: "2024-11-22", km:1091, cabin:"economy", co2kg:196, type:"short haul" }
     ];
-    const monthly={labels:["Sep 2024","Oct 2024","Nov 2024","Dec 2024"],co2kg:[900,2100,4800,1300]};
-    const sum=a=>a.reduce((x,y)=>x+y,0);
 
+    // Optional fallback monthly data (used only if there are no recent-months computed)
+    const monthly = { labels:["Sep 2024","Oct 2024","Nov 2024","Dec 2024"], co2kg:[900,2100,4800,1300] };
+
+    const sum = a => a.reduce((x,y)=>x+y,0);
+
+    // ===== UI Renderers =====
     function renderKpis(){
-      document.getElementById("kpiFlights").textContent=recent.length;
-      document.getElementById("kpiCO2").textContent=sum(recent.map(r=>r.co2kg))+" kg";
-      document.getElementById("kpiKm").textContent=sum(recent.map(r=>r.km))+" km";
-      document.getElementById("kpiTrees").textContent=Math.round(sum(recent.map(r=>r.co2kg))/22);
+      document.getElementById("kpiFlights").textContent = recent.length;
+      document.getElementById("kpiCO2").textContent = sum(recent.map(r=>r.co2kg)) + " kg";
+      document.getElementById("kpiKm").textContent = sum(recent.map(r=>r.km)) + " km";
+      document.getElementById("kpiTrees").textContent = Math.round(sum(recent.map(r=>r.co2kg))/22);
     }
+
     function renderList(){
-      const ul=document.getElementById("recentFlights"); ul.innerHTML="";
-      recent.forEach(r=>ul.innerHTML+=`<li class="flight">
-        <div>✈️</div>
-        <div>
-          <div><strong>${r.airline}</strong> <span class="badge">${r.code}</span> <span class="tag">${r.cabin}</span></div>
-          <div class="dim">${r.from} → ${r.to} • ${r.when}</div>
-          <div class="dim">${r.km} km • ${r.type}</div>
-        </div>
-        <div><div class="badge">${r.co2kg} kg CO₂</div></div>
-      </li>`);
+      const ul = document.getElementById("recentFlights");
+      ul.innerHTML = "";
+      recent.forEach(r=>{
+        ul.innerHTML += `<li class="flight">
+          <div>✈️</div>
+          <div>
+            <div><strong>${r.airline}</strong> <span class="badge">${r.code}</span> <span class="tag">${r.cabin}</span></div>
+            <div class="dim">${r.from} → ${r.to} • ${r.when}</div>
+            <div class="dim">${r.km} km • ${r.type}</div>
+          </div>
+          <div><div class="badge">${r.co2kg} kg CO₂</div></div>
+        </li>`;
+      });
     }
-    
+
+    // ===== Chart: create a reusable Chart.js instance =====
+    let co2Chart = new Chart(document.getElementById("co2Chart"), {
+      type: "bar",
+      data: { labels: [], datasets: [{ label: "CO₂ (kg)", data: [], borderRadius: 10 }] },
+      options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+    });
+
+    // Aggregate recent flights by month-year and return ordered labels/data
+    function getMonthlyCo2() {
+      const map = new Map();
+      recent.forEach(r => {
+        const d = r.dateISO ? new Date(r.dateISO) : new Date(r.when);
+        if (isNaN(d)) return;
+        const key = `${d.getFullYear()}-${d.getMonth()}`;
+        if (!map.has(key)) {
+          map.set(key, {
+            label: d.toLocaleString(undefined, { month: "short", year: "numeric" }),
+            sum: 0,
+            ts: new Date(d.getFullYear(), d.getMonth(), 1).getTime()
+          });
+        }
+        map.get(key).sum += (r.co2kg || 0);
+      });
+      const arr = Array.from(map.values()).sort((a,b)=>a.ts - b.ts);
+      return { labels: arr.map(x=>x.label), data: arr.map(x=>x.sum) };
+    }
+
+    function updateChart() {
+      const { labels, data } = getMonthlyCo2();
+      co2Chart.data.labels = labels.length ? labels : monthly.labels;
+      co2Chart.data.datasets[0].data = data.length ? data : monthly.co2kg;
+      co2Chart.update();
+    }
+
     // ===== Navigation =====
-    const dash=document.getElementById("dashboardSection"), add=document.getElementById("addFlightSection");
-    document.getElementById("addFlightBtn").onclick=()=>{dash.classList.add("hidden");add.classList.remove("hidden");};
-    document.getElementById("dashboardLink").onclick=e=>{e.preventDefault();add.classList.add("hidden");dash.classList.remove("hidden");};
+    const dash = document.getElementById("dashboardSection"), add = document.getElementById("addFlightSection");
+    document.getElementById("addFlightBtn").onclick = ()=>{ dash.classList.add("hidden"); add.classList.remove("hidden"); };
+    document.getElementById("dashboardLink").onclick = e => { e.preventDefault(); add.classList.add("hidden"); dash.classList.remove("hidden"); };
 
     // ===== Form + estimates =====
-    const form=document.getElementById("addFlightForm");
-    
+    const form = document.getElementById("addFlightForm");
     function computeKm(){
       const a = lookupAirport(form.from.value), b = lookupAirport(form.to.value);
       if(!a || !b) return 0;
       return Math.round(haversine(a,b));
     }
-
     function estimate(){
-      const km=computeKm(), cabin=form.cabin.value, ac=form.aircraft.value;
-      let f=0.18;
-      if(ac==="wide") f*=1.05;
-      if(cabin==="business") f*=2;
-      if(cabin==="first") f*=3;
-      const co2=Math.round(km*f), trees=Math.round(co2/22);
-      document.getElementById("estimateCO2").textContent=`${co2} kg`;
-      document.getElementById("estimateMeta").textContent=`Distance: ${km} km • Trees: ${trees}`;
-      document.getElementById("perspCar").textContent=Math.round(co2/0.12);
-      document.getElementById("perspTrees").textContent=trees;
-      document.getElementById("perspEnergy").textContent=Math.round(co2/300);
-      updateImpact(true,co2);
-      return {km,co2};
+      const km = computeKm(), cabin = form.cabin.value, ac = form.aircraft.value;
+      let f = 0.18;
+      if(ac === "wide") f *= 1.05;
+      if(cabin === "business") f *= 2;
+      if(cabin === "first") f *= 3;
+      const co2 = Math.round(km * f), trees = Math.round(co2 / 22);
+      document.getElementById("estimateCO2").textContent = `${co2} kg`;
+      document.getElementById("estimateMeta").textContent = `Distance: ${km} km • Trees: ${trees}`;
+      document.getElementById("perspCar").textContent = Math.round(co2 / 0.12);
+      document.getElementById("perspTrees").textContent = trees;
+      document.getElementById("perspEnergy").textContent = Math.round(co2 / 300);
+      updateImpact(true, co2);
+      return { km, co2 };
     }
-
     function resetEstimateUI(){
-      document.getElementById("estimateCO2").textContent="0 kg";
-      document.getElementById("estimateMeta").textContent="Distance: 0 km • Trees: 0";
-      document.getElementById("perspCar").textContent="0";
-      document.getElementById("perspTrees").textContent="0";
-      document.getElementById("perspEnergy").textContent="0";
+      document.getElementById("estimateCO2").textContent = "0 kg";
+      document.getElementById("estimateMeta").textContent = "Distance: 0 km • Trees: 0";
+      document.getElementById("perspCar").textContent = "0";
+      document.getElementById("perspTrees").textContent = "0";
+      document.getElementById("perspEnergy").textContent = "0";
       updateImpact(false);
     }
-
-    function updateImpact(preview=false,current=0){
-      const totalSaved=sum(recent.map(r=>r.co2kg)), flights=recent.length;
-      const total=preview?totalSaved+current:totalSaved;
-      const f=preview?(flights+(current>0?1:0)):flights;
-      document.getElementById("impactTotalCo2").textContent=total;
-      document.getElementById("impactTrees").textContent=Math.round(total/22);
-      document.getElementById("impactAvg").textContent=f?Math.round(total/f):0;
-      document.getElementById("impactHint").textContent=preview?"Includes saved flights + this entry.":"Includes saved flights.";
+    function updateImpact(preview=false, current=0){
+      const totalSaved = sum(recent.map(r=>r.co2kg)), flights=recent.length;
+      const total = preview ? totalSaved + current : totalSaved;
+      const f = preview ? (flights + (current>0?1:0)) : flights;
+      document.getElementById("impactTotalCo2").textContent = total;
+      document.getElementById("impactTrees").textContent = Math.round(total / 22);
+      document.getElementById("impactAvg").textContent = f ? Math.round(total / f) : 0;
+      document.getElementById("impactHint").textContent = preview ? "Includes saved flights + this entry." : "Includes saved flights.";
     }
 
-    ["input","change"].forEach(ev=>["from","to","cabin","aircraft"].forEach(n=>form[n].addEventListener(ev,estimate)));
+    // Wire estimate previews
+    ["input","change"].forEach(ev => ["from","to","cabin","aircraft"].forEach(n => {
+      if(form[n]) form[n].addEventListener(ev, estimate);
+    }));
 
-    form.onsubmit=e=>{
+    form.onsubmit = e => {
       e.preventDefault();
-      const {km, co2} = estimate();
-      if (!km) {
-        alert("Could not calculate distance. Please check your From/To inputs.");
-        return;
-      }
-      // Fix date handling (local time, no -1 day)
+      const { km, co2 } = estimate();
+      if (!km) { alert("Could not calculate distance. Please check your From/To inputs."); return; }
       const [y,m,d] = form.date.value.split("-");
       const formattedDate = new Date(y, m-1, d).toLocaleDateString(undefined, { year:"numeric", month:"short", day:"numeric" });
-
-      const form = document.getElementById("flightForm");
-
+      // Store dateISO (YYYY-MM-DD) for robust aggregation
       recent.unshift({
-        airline: form.airline.value||"Airline",
-        code: (form.code.value||"NEW").toUpperCase(),
-        from: form.from.value, to: form.to.value,
+        airline: form.airline.value || "Airline",
+        code: (form.code.value || "NEW").toUpperCase(),
+        from: form.from.value,
+        to: form.to.value,
         when: formattedDate,
-        km, co2kg: co2, cabin: form.cabin.value,
-        type: km>3500?"long haul":"short haul"
+        dateISO: form.date.value,
+        km,
+        co2kg: co2,
+        cabin: form.cabin.value,
+        type: km > 3500 ? "long haul" : "short haul"
       });
-      renderKpis(); 
-      renderList(); 
+      renderKpis();
+      renderList();
       updateImpact(false);
-      updateChart();
-      dash.classList.remove("hidden"); 
+      updateChart(); // <-- refresh chart after adding flight
+      dash.classList.remove("hidden");
       add.classList.add("hidden");
-      form.reset(); 
+      form.reset();
       resetEstimateUI();
     };
-    
+
+    // ===== Init =====
+    renderKpis();
+    renderList();
+    estimate();
+    updateImpact(false);
+    updateChart(); // populate chart from current `recent`
   </script>
 </body>
 </html>
