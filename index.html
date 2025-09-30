@@ -106,7 +106,8 @@
         <div class="kpi kpi-red"><div class="kpi-value" id="kpiCO2">0 kg</div><div>Total CO₂</div></div>
         <div class="kpi kpi-purple"><div class="kpi-value" id="kpiKm">0 km</div><div>Distance</div></div>
         <div class="kpi kpi-green"><div class="kpi-value" id="kpiTrees">0</div><div>Trees</div></div>
-      
+        <div class="card"><canvas id="co2Chart"></canvas></div>
+    
 
       <!-- 🎮 Two game buttons at the very bottom -->
       <div class="games-footer">
@@ -332,7 +333,7 @@ form.onsubmit = e => {
     
 
     // ===== Init =====
-    renderKpis(); renderList(); estimate(); updateImpact(false);
+    renderKpis(); renderList(); estimate(); updateImpact(false); updateChart();
   </script>
 </body>
 </html>
