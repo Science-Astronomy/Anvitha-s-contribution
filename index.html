@@ -307,7 +307,16 @@
       // Fix date handling (local time, no -1 day)
       const [y,m,d] = form.date.value.split("-");
       const formattedDate = new Date(y, m-1, d).toLocaleDateString(undefined, { year:"numeric", month:"short", day:"numeric" });
-      
+
+      const form = document.getElementById("flightForm");
+
+form.onsubmit = e => {
+  e.preventDefault();
+  saveFlight();
+  renderKpis();
+  renderList();
+  updateImpact(false);
+};
       recent.unshift({
         airline: form.airline.value||"Airline",
         code: (form.code.value||"NEW").toUpperCase(),
@@ -320,6 +329,7 @@
       dash.classList.remove("hidden"); add.classList.add("hidden");
       form.reset(); resetEstimateUI();
     };
+    
 
     // ===== Init =====
     renderKpis(); renderList(); estimate(); updateImpact(false);
