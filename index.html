@@ -27,6 +27,8 @@
     .brand-icon { width: 40px; height: 40px; display: grid; place-items: center; background: #e6f6ea; border-radius: 12px; }
     .brand-title { font-weight: 700; }
     .brand-sub { font-size: 0.85rem; color: var(--muted); }
+    .auth-controls { margin-top: 16px; display: grid; gap: 8px; }
+    .auth-controls .badge { justify-self: start; background: #dcfce7; color: #14532d; }
     .nav { display: flex; flex-direction: column; gap: 8px; margin-top: 18px; }
     .nav-item, .btn { cursor: pointer; border: none; border-radius: 12px; padding: 10px 12px; font-weight: 600; }
     .nav-item { display: flex; gap: 10px; text-decoration: none; color: var(--ink); }
@@ -66,6 +68,7 @@
     .impact-item{background:rgba(255,255,255,.25);border-radius:12px;padding:12px}
     .impact-value{font-size:22px;font-weight:800}
     .impact-label{font-size:12px;opacity:.9}
+    .share-toolbar { margin: 16px 0; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
 
     /* 🎮 Games footer buttons */
     .games-footer { text-align:center; margin-top: 28px; }
@@ -88,6 +91,11 @@
           <div class="brand-sub">Carbon Impact Monitor</div>
         </div>
       </div>
+      <div class="auth-controls">
+        <span id="userBadge" class="badge">Guest</span>
+        <button id="loginBtn" class="btn btn-green">Sign in with Google</button>
+        <button id="logoutBtn" class="btn btn-ghost hidden">Sign out</button>
+      </div>
       <nav class="nav">
         <a id="dashboardLink" class="nav-item active" href="#">Dashboard</a>
         <button id="addFlightBtn" class="btn btn-ghost">＋ Add Flight</button>
@@ -101,6 +109,10 @@
     <!-- Dashboard -->
     <section id="dashboardSection">
       <header class="page-header"><h1>Flight Dashboard</h1></header>
+      <div class="share-toolbar">
+        <button id="shareBtn" class="btn btn-green">Share Impact</button>
+        <span class="dim">Share totals only—your flight details stay private.</span>
+      </div>
       <section class="kpi-grid">
         <div class="kpi kpi-blue"><div class="kpi-value" id="kpiFlights">0</div><div>Total Flights</div></div>
         <div class="kpi kpi-red"><div class="kpi-value" id="kpiCO2">0 kg</div><div>Total CO₂</div></div>
@@ -179,159 +191,422 @@
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <script>
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js';
+    import {
+      getAuth,
+      GoogleAuthProvider,
+      onAuthStateChanged,
+      signInWithPopup,
+      signOut
+    } from 'https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js';
+    import {
+      collection,
+      doc,
+      getDocs,
+      getFirestore,
+      limit,
+      orderBy,
+      query,
+      serverTimestamp,
+      setDoc
+    } from 'https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js';
+
+    // ===== DOM references =====
+    const loginBtn = document.getElementById('loginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const userBadge = document.getElementById('userBadge');
+    const shareBtn = document.getElementById('shareBtn');
+    const dashboardLink = document.getElementById('dashboardLink');
+    const addFlightBtn = document.getElementById('addFlightBtn');
+    const dash = document.getElementById('dashboardSection');
+    const add = document.getElementById('addFlightSection');
+    const form = document.getElementById('addFlightForm');
+
+    // ===== Firebase bootstrap =====
+    const firebaseConfig = {
+      apiKey: 'AIzaSyAsJR5Sv9T6Jfk7QIl8x1NJ-kVYnoMPHNE',
+      authDomain: 'flight-tracker-406c7.firebaseapp.com',
+      projectId: 'flight-tracker-406c7',
+      storageBucket: 'flight-tracker-406c7.firebasestorage.app',
+      messagingSenderId: '1011985254671',
+      appId: '1:1011985254671:web:1fd11778bebfe17a05967a'
+    };
+
+    const firebaseConfigReady = Object.values(firebaseConfig).every(value => Boolean(value));
+    let app, auth, db;
+
+    if (firebaseConfigReady) {
+      app = initializeApp(firebaseConfig);
+      auth = getAuth(app);
+      db = getFirestore(app);
+    } else {
+      console.warn('Firebase config missing. Sign-in features stay disabled until you add real keys.');
+    }
+
     // ===== Airport DB =====
-    let IATA_MAP=new Map(), ICAO_MAP=new Map(), CITY_MAP = new Map();
+    const IATA_MAP = new Map();
+    const ICAO_MAP = new Map();
+    const CITY_MAP = new Map();
 
-    async function loadAirports(){
-      try{
-        const resp = await fetch("https://cdn.jsdelivr.net/gh/mwgg/Airports/airports.json");
+    async function loadAirports() {
+      try {
+        const resp = await fetch('https://cdn.jsdelivr.net/gh/mwgg/Airports/airports.json');
         const data = await resp.json();
-        for(const icao in data){
-          const r = data[icao];
-          const lat = +r.lat, lon = +r.lon;
-          if(!Number.isFinite(lat) || !Number.isFinite(lon)) continue;
+        for (const icao in data) {
+          const record = data[icao];
+          const lat = Number(record.lat);
+          const lon = Number(record.lon);
+          if (!Number.isFinite(lat) || !Number.isFinite(lon)) continue;
 
-          ICAO_MAP.set(icao.toUpperCase(), [lat,lon]);
-          if(r.iata) IATA_MAP.set(r.iata.toUpperCase(), [lat,lon]);
-          if(r.city){ CITY_MAP.set(r.city.toUpperCase(), [lat,lon]); }
+          ICAO_MAP.set(icao.toUpperCase(), [lat, lon]);
+          if (record.iata) IATA_MAP.set(record.iata.toUpperCase(), [lat, lon]);
+          if (record.city) CITY_MAP.set(record.city.toUpperCase(), [lat, lon]);
         }
-      }catch(e){ console.error("Airport DB load failed", e); }
+      } catch (error) {
+        console.error('Airport DB load failed', error);
+      }
     }
     loadAirports();
-    
-    // ✅ Name restored to lookupAirport to match callers
-    function lookupAirport(p){
-      if(!p) return null;
-      p = p.trim().toUpperCase();
 
-      // Support @lat,lon
-      if(p.startsWith("@")){ 
-        const [la,lo] = p.slice(1).split(",");
-        return [parseFloat(la), parseFloat(lo)];
+    function lookupAirport(token) {
+      if (!token) return null;
+      const upper = token.trim().toUpperCase();
+      if (upper.startsWith('@')) {
+        const [lat, lon] = upper.slice(1).split(',');
+        return [parseFloat(lat), parseFloat(lon)];
       }
-
-      if(CITY_MAP.has(p)) return CITY_MAP.get(p);
-      if(IATA_MAP.has(p)) return IATA_MAP.get(p);
-      if(ICAO_MAP.has(p)) return ICAO_MAP.get(p);
-
-      console.warn("Unknown airport:", p);
+      if (CITY_MAP.has(upper)) return CITY_MAP.get(upper);
+      if (IATA_MAP.has(upper)) return IATA_MAP.get(upper);
+      if (ICAO_MAP.has(upper)) return ICAO_MAP.get(upper);
+      console.warn('Unknown airport:', token);
       return null;
     }
 
-    const R=6371,toRad=d=>d*Math.PI/180;
-    const haversine=(a,b)=>2*R*Math.asin(Math.sqrt(Math.sin((toRad(b[0]-a[0]))/2)**2+Math.cos(toRad(a[0]))*Math.cos(toRad(b[0]))*Math.sin((toRad(b[1]-a[1]))/2)**2));
-
-    // ===== Demo flights =====
-    const recent=[
-      { airline:"British Airways", code:"BA112", from:"New York", to:"London", when:"Dec 14, 2024", km:5585, cabin:"economy", co2kg:1089, type:"long haul" },
-      { airline:"Air France", code:"AF1234", from:"Paris", to:"Madrid", when:"Nov 30, 2024", km:1050, cabin:"economy", co2kg:210, type:"short haul" },
-      { airline:"United Airlines", code:"UA415", from:"San Francisco", to:"Seattle", when:"Nov 22, 2024", km:1091, cabin:"economy", co2kg:196, type:"short haul" }
-    ];
-    const monthly={labels:["Sep 2024","Oct 2024","Nov 2024","Dec 2024"],co2kg:[900,2100,4800,1300]};
-    const sum=a=>a.reduce((x,y)=>x+y,0);
-
-    function renderKpis(){
-      document.getElementById("kpiFlights").textContent=recent.length;
-      document.getElementById("kpiCO2").textContent=sum(recent.map(r=>r.co2kg))+" kg";
-      document.getElementById("kpiKm").textContent=sum(recent.map(r=>r.km))+" km";
-      document.getElementById("kpiTrees").textContent=Math.round(sum(recent.map(r=>r.co2kg))/22);
-    }
-    function renderList(){
-      const ul=document.getElementById("recentFlights"); ul.innerHTML="";
-      recent.forEach(r=>ul.innerHTML+=`<li class="flight">
-        <div>✈️</div>
-        <div>
-          <div><strong>${r.airline}</strong> <span class="badge">${r.code}</span> <span class="tag">${r.cabin}</span></div>
-          <div class="dim">${r.from} → ${r.to} • ${r.when}</div>
-          <div class="dim">${r.km} km • ${r.type}</div>
-        </div>
-        <div><div class="badge">${r.co2kg} kg CO₂</div></div>
-      </li>`);
-    }
-    new Chart(document.getElementById("co2Chart"),{
-      type:"bar",
-      data:{labels:monthly.labels,datasets:[{label:"CO₂ (kg)",data:monthly.co2kg,borderRadius:10}]},
-      options:{plugins:{legend:{display:false}}}
-    });
-
-    // ===== Navigation =====
-    const dash=document.getElementById("dashboardSection"), add=document.getElementById("addFlightSection");
-    document.getElementById("addFlightBtn").onclick=()=>{dash.classList.add("hidden");add.classList.remove("hidden");};
-    document.getElementById("dashboardLink").onclick=e=>{e.preventDefault();add.classList.add("hidden");dash.classList.remove("hidden");};
-
-    // ===== Form + estimates =====
-    const form=document.getElementById("addFlightForm");
-    
-    function computeKm(){
-      const a = lookupAirport(form.from.value), b = lookupAirport(form.to.value);
-      if(!a || !b) return 0;
-      return Math.round(haversine(a,b));
-    }
-
-    function estimate(){
-      const km=computeKm(), cabin=form.cabin.value, ac=form.aircraft.value;
-      let f=0.18;
-      if(ac==="wide") f*=1.05;
-      if(cabin==="business") f*=2;
-      if(cabin==="first") f*=3;
-      const co2=Math.round(km*f), trees=Math.round(co2/22);
-      document.getElementById("estimateCO2").textContent=`${co2} kg`;
-      document.getElementById("estimateMeta").textContent=`Distance: ${km} km • Trees: ${trees}`;
-      document.getElementById("perspCar").textContent=Math.round(co2/0.12);
-      document.getElementById("perspTrees").textContent=trees;
-      document.getElementById("perspEnergy").textContent=Math.round(co2/300);
-      updateImpact(true,co2);
-      return {km,co2};
-    }
-
-    function resetEstimateUI(){
-      document.getElementById("estimateCO2").textContent="0 kg";
-      document.getElementById("estimateMeta").textContent="Distance: 0 km • Trees: 0";
-      document.getElementById("perspCar").textContent="0";
-      document.getElementById("perspTrees").textContent="0";
-      document.getElementById("perspEnergy").textContent="0";
-      updateImpact(false);
-    }
-
-    function updateImpact(preview=false,current=0){
-      const totalSaved=sum(recent.map(r=>r.co2kg)), flights=recent.length;
-      const total=preview?totalSaved+current:totalSaved;
-      const f=preview?(flights+(current>0?1:0)):flights;
-      document.getElementById("impactTotalCo2").textContent=total;
-      document.getElementById("impactTrees").textContent=Math.round(total/22);
-      document.getElementById("impactAvg").textContent=f?Math.round(total/f):0;
-      document.getElementById("impactHint").textContent=preview?"Includes saved flights + this entry.":"Includes saved flights.";
-    }
-
-    ["input","change"].forEach(ev=>["from","to","cabin","aircraft"].forEach(n=>form[n].addEventListener(ev,estimate)));
-
-    form.onsubmit=e=>{
-      e.preventDefault();
-      const {km, co2} = estimate();
-      if (!km) {
-        alert("Could not calculate distance. Please check your From/To inputs.");
-        return;
-      }
-      // Fix date handling (local time, no -1 day)
-      const [y,m,d] = form.date.value.split("-");
-      const formattedDate = new Date(y, m-1, d).toLocaleDateString(undefined, { year:"numeric", month:"short", day:"numeric" });
-      
-      recent.unshift({
-        airline: form.airline.value||"Airline",
-        code: (form.code.value||"NEW").toUpperCase(),
-        from: form.from.value, to: form.to.value,
-        when: formattedDate,
-        km, co2kg: co2, cabin: form.cabin.value,
-        type: km>3500?"long haul":"short haul"
-      });
-      renderKpis(); renderList(); updateImpact(false);
-      dash.classList.remove("hidden"); add.classList.add("hidden");
-      form.reset(); resetEstimateUI();
+    const EARTH_RADIUS_KM = 6371;
+    const toRad = degrees => degrees * Math.PI / 180;
+    const haversine = (a, b) => {
+      return 2 * EARTH_RADIUS_KM * Math.asin(Math.sqrt(
+        Math.sin((toRad(b[0] - a[0])) / 2) ** 2 +
+        Math.cos(toRad(a[0])) * Math.cos(toRad(b[0])) *
+        Math.sin((toRad(b[1] - a[1])) / 2) ** 2
+      ));
     };
 
+    // ===== Demo data =====
+    const demoFlights = [
+      { airline: 'British Airways', code: 'BA112', from: 'New York', to: 'London', when: 'Dec 14, 2024', dateISO: '2024-12-14', km: 5585, cabin: 'economy', co2kg: 1089, type: 'long haul' },
+      { airline: 'Air France', code: 'AF1234', from: 'Paris', to: 'Madrid', when: 'Nov 30, 2024', dateISO: '2024-11-30', km: 1050, cabin: 'economy', co2kg: 210, type: 'short haul' },
+      { airline: 'United Airlines', code: 'UA415', from: 'San Francisco', to: 'Seattle', when: 'Nov 22, 2024', dateISO: '2024-11-22', km: 1091, cabin: 'economy', co2kg: 196, type: 'short haul' }
+    ];
+    const monthly = { labels: ['Sep 2024', 'Oct 2024', 'Nov 2024', 'Dec 2024'], co2kg: [900, 2100, 4800, 1300] };
+    let currentFlights = [...demoFlights];
+
+    const co2Chart = new Chart(document.getElementById('co2Chart'), {
+      type: 'bar',
+      data: { labels: monthly.labels, datasets: [{ label: 'CO₂ (kg)', data: monthly.co2kg, borderRadius: 10 }] },
+      options: { plugins: { legend: { display: false } } }
+    });
+
+    // ===== Rendering helpers =====
+    function summariseFlights(flights) {
+      return flights.reduce((acc, flight) => {
+        acc.totalFlights += 1;
+        acc.totalCo2 += Number(flight.co2kg || 0);
+        acc.totalKm += Number(flight.km || 0);
+        return acc;
+      }, { totalFlights: 0, totalCo2: 0, totalKm: 0 });
+    }
+
+    // Aggregate flights by month-year and return ordered labels/data
+    function getMonthlyCo2(flights) {
+      const map = new Map();
+      flights.forEach(r => {
+        const d = r.dateISO ? new Date(r.dateISO) : new Date(r.when);
+        if (isNaN(d)) return;
+        const key = `${d.getFullYear()}-${d.getMonth()}`;
+        if (!map.has(key)) {
+          map.set(key, {
+            label: d.toLocaleString(undefined, { month: 'short', year: 'numeric' }),
+            sum: 0,
+            ts: new Date(d.getFullYear(), d.getMonth(), 1).getTime()
+          });
+        }
+        map.get(key).sum += (r.co2kg || 0);
+      });
+      const arr = Array.from(map.values()).sort((a,b)=>a.ts - b.ts);
+      return { labels: arr.map(x=>x.label), data: arr.map(x=>x.sum) };
+    }
+
+    function updateChart() {
+      const { labels, data } = getMonthlyCo2(currentFlights);
+      co2Chart.data.labels = labels.length ? labels : monthly.labels;
+      co2Chart.data.datasets[0].data = data.length ? data : monthly.co2kg;
+      co2Chart.update();
+    }
+
+    function renderKpis(flights = currentFlights) {
+      const summary = summariseFlights(flights);
+      document.getElementById('kpiFlights').textContent = summary.totalFlights;
+      document.getElementById('kpiCO2').textContent = `${Math.round(summary.totalCo2)} kg`;
+      document.getElementById('kpiKm').textContent = `${Math.round(summary.totalKm)} km`;
+      document.getElementById('kpiTrees').textContent = Math.round(summary.totalCo2 / 22);
+    }
+
+    function renderList(flights = currentFlights) {
+      const list = document.getElementById('recentFlights');
+      if (!list) return;
+      if (!flights.length) {
+        list.innerHTML = '<li class="flight dim">No flights yet. Add one to see it here!</li>';
+        return;
+      }
+      list.innerHTML = flights.map(flight => `
+        <li class="flight">
+          <div>✈️</div>
+          <div>
+            <div><strong>${flight.airline}</strong> <span class="badge">${flight.code}</span> <span class="tag">${flight.cabin}</span></div>
+            <div class="dim">${flight.from} → ${flight.to} • ${flight.when}</div>
+            <div class="dim">${flight.km} km • ${flight.type}</div>
+          </div>
+          <div><div class="badge">${flight.co2kg} kg CO₂</div></div>
+        </li>`).join('');
+    }
+
+    function updateImpactPanel(flights = currentFlights, { previewFlight } = {}) {
+      const base = Array.isArray(flights) ? [...flights] : [];
+      const combined = previewFlight ? [previewFlight, ...base] : base;
+      const summary = summariseFlights(combined);
+      const flightsCount = summary.totalFlights;
+      const totalCo2 = Math.round(summary.totalCo2);
+      document.getElementById('impactTotalCo2').textContent = totalCo2;
+      document.getElementById('impactTrees').textContent = Math.round(totalCo2 / 22);
+      document.getElementById('impactAvg').textContent = flightsCount ? Math.round(totalCo2 / flightsCount) : 0;
+      const hint = previewFlight ? 'Includes saved flights + this entry.' : (flightsCount ? 'Includes saved flights.' : 'No flights saved yet.');
+      document.getElementById('impactHint').textContent = hint;
+    }
+
+    function updateUiWithFlights(flights) {
+      currentFlights = Array.isArray(flights) ? [...flights] : [];
+      renderKpis();
+      renderList();
+      updateImpactPanel();
+      updateChart();
+    }
+
+    function getCurrentFlights() {
+      return [...currentFlights];
+    }
+
+    function resetToDemoData() {
+      updateUiWithFlights(demoFlights);
+    }
+
+    // ===== Distance + estimate helpers =====
+    function computeKm() {
+      const fromCoords = lookupAirport(form.from.value);
+      const toCoords = lookupAirport(form.to.value);
+      if (!fromCoords || !toCoords) return 0;
+      return Math.round(haversine(fromCoords, toCoords));
+    }
+
+    function estimate() {
+      const km = computeKm();
+      const cabin = form.cabin.value;
+      const aircraft = form.aircraft.value;
+      let factor = 0.18;
+      if (aircraft === 'wide') factor *= 1.05;
+      if (cabin === 'business') factor *= 2;
+      if (cabin === 'first') factor *= 3;
+      const co2 = Math.round(km * factor);
+      const trees = Math.round(co2 / 22);
+
+      document.getElementById('estimateCO2').textContent = `${co2} kg`;
+      document.getElementById('estimateMeta').textContent = `Distance: ${km} km • Trees: ${trees}`;
+      document.getElementById('perspCar').textContent = Math.round(co2 / 0.12);
+      document.getElementById('perspTrees').textContent = trees;
+      document.getElementById('perspEnergy').textContent = Math.round(co2 / 300);
+
+      updateImpactPanel(currentFlights, {
+        previewFlight: km ? { co2kg: co2, km } : null
+      });
+
+      return { km, co2 };
+    }
+
+    function resetEstimateUI() {
+      document.getElementById('estimateCO2').textContent = '0 kg';
+      document.getElementById('estimateMeta').textContent = 'Distance: 0 km • Trees: 0';
+      document.getElementById('perspCar').textContent = '0';
+      document.getElementById('perspTrees').textContent = '0';
+      document.getElementById('perspEnergy').textContent = '0';
+      updateImpactPanel(currentFlights);
+    }
+
+    ['input', 'change'].forEach(eventName => {
+      ['from', 'to', 'cabin', 'aircraft'].forEach(field => {
+        form[field].addEventListener(eventName, estimate);
+      });
+    });
+
+    async function saveFlight(uid, flight) {
+      if (!db) return;
+      const flightsRef = collection(db, 'users', uid, 'flights');
+      const docId = `${Date.now()}`;
+      await setDoc(doc(flightsRef, docId), {
+        ...flight,
+        createdAt: serverTimestamp()
+      });
+    }
+
+    async function loadFlights(uid) {
+      if (!db) {
+        resetToDemoData();
+        return;
+      }
+      const flightsRef = collection(db, 'users', uid, 'flights');
+      const q = query(flightsRef, orderBy('createdAt', 'desc'), limit(50));
+      const snapshot = await getDocs(q);
+      const flights = snapshot.docs.map(docSnap => {
+        const data = docSnap.data();
+        return {
+          ...data,
+          when: data.when || 'Unknown date',
+          co2kg: Math.round(data.co2kg || 0),
+          km: Math.round(data.km || 0)
+        };
+      });
+      updateUiWithFlights(flights);
+    }
+
+    async function handleFormSubmit(event) {
+      event.preventDefault();
+      const { km, co2 } = estimate();
+      if (!km) {
+        alert('Could not calculate distance. Please check your From/To inputs.');
+        return;
+      }
+
+      const [year, month, day] = form.date.value.split('-');
+      const formattedDate = new Date(year, month - 1, day).toLocaleDateString(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+
+      const flightRecord = {
+        airline: form.airline.value || 'Airline',
+        code: (form.code.value || 'NEW').toUpperCase(),
+        from: form.from.value,
+        to: form.to.value,
+        when: formattedDate,
+        dateISO: form.date.value,
+        km,
+        co2kg: co2,
+        cabin: form.cabin.value,
+        type: km > 3500 ? 'long haul' : 'short haul'
+      };
+
+      if (auth && auth.currentUser) {
+        await saveFlight(auth.currentUser.uid, flightRecord);
+        await loadFlights(auth.currentUser.uid);
+      } else {
+        demoFlights.unshift(flightRecord);
+        updateUiWithFlights(demoFlights);
+      }
+
+      dash.classList.remove('hidden');
+      add.classList.add('hidden');
+      form.reset();
+      resetEstimateUI();
+    }
+
+    form.addEventListener('submit', handleFormSubmit);
+
+    addFlightBtn.addEventListener('click', () => {
+      dash.classList.add('hidden');
+      add.classList.remove('hidden');
+    });
+
+    dashboardLink.addEventListener('click', event => {
+      event.preventDefault();
+      add.classList.add('hidden');
+      dash.classList.remove('hidden');
+    });
+
+    if (loginBtn) {
+      loginBtn.addEventListener('click', async () => {
+        if (!firebaseConfigReady || !auth) {
+          alert('Add your Firebase config in index.html before enabling Google sign-in.');
+          return;
+        }
+        try {
+          await signInWithPopup(auth, new GoogleAuthProvider());
+        } catch (error) {
+          alert(`Login failed: ${error.message}`);
+        }
+      });
+    }
+
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', async () => {
+        if (!auth) return;
+        await signOut(auth);
+      });
+    }
+
+    if (firebaseConfigReady && auth) {
+      onAuthStateChanged(auth, user => {
+        if (user) {
+          loginBtn.classList.add('hidden');
+          logoutBtn.classList.remove('hidden');
+          userBadge.textContent = user.displayName || user.email;
+          loadFlights(user.uid);
+        } else {
+          loginBtn.classList.remove('hidden');
+          logoutBtn.classList.add('hidden');
+          userBadge.textContent = 'Guest';
+          resetToDemoData();
+        }
+      });
+    } else {
+      loginBtn.classList.remove('hidden');
+      logoutBtn.classList.add('hidden');
+      userBadge.textContent = 'Guest';
+      resetToDemoData();
+    }
+
+    if (shareBtn) {
+      shareBtn.addEventListener('click', async () => {
+        const flights = getCurrentFlights();
+        const summary = summariseFlights(flights);
+        const trees = Math.round(summary.totalCo2 / 22);
+        const shareText = `I tracked ${summary.totalFlights} flights offsetting ${trees} trees worth of CO₂!`;
+
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title: 'My FlightTracker Impact',
+              text: shareText,
+              url: window.location.origin
+            });
+          } catch (error) {
+            alert('Share canceled or failed. Try again.');
+          }
+        } else {
+          try {
+            await navigator.clipboard.writeText(`${shareText}\nVisit: ${window.location.href}`);
+            alert('Share text copied—paste it anywhere!');
+          } catch (error) {
+            alert('Copy failed. Press ⌘+C / Ctrl+C to share manually.');
+          }
+        }
+      });
+    }
+
     // ===== Init =====
-    renderKpis(); renderList(); estimate(); updateImpact(false);
+    resetToDemoData();
+    estimate();
+    updateChart();
   </script>
 </body>
 </html>
